@@ -78,9 +78,6 @@ header h1{font-size:15px}
 .rbt{height:6px;background:#f0f0f0;border-radius:3px;overflow:hidden}
 .rbf{height:100%;border-radius:3px}
 .ba{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;align-items:center}
-.ba button{padding:6px 10px;border-radius:6px;font-size:10px;font-weight:600;cursor:pointer;border:none}
-.bup{border:2px dashed #ddd;border-radius:8px;padding:12px;text-align:center;background:#fafafa;cursor:pointer;margin-bottom:10px}
-.bup input{display:none}
 </style>
 </head>
 <body>
@@ -89,7 +86,7 @@ header h1{font-size:15px}
 <div class="lb">
 <div style="font-size:40px">🏢</div>
 <h1>VMS Pro</h1>
-<p>Cloud-Synced Visitor Management</p>
+<p>Visitor Management System</p>
 <form id="lForm">
 <div class="f"><label>USERNAME</label><input id="lU" required placeholder="Username" autocomplete="off"></div>
 <div class="f"><label>PASSWORD</label><input id="lP" type="password" required placeholder="Password" autocomplete="off"></div>
@@ -102,7 +99,7 @@ header h1{font-size:15px}
 
 <div id="app">
 <header>
-<div><h1>🏢 VMS Pro</h1><div style="font-size:8px;opacity:.8"><span class="dot" id="dot"></span><span id="stxt">Synced</span></div></div>
+<div><h1>🏢 VMS Pro</h1><div style="font-size:8px;opacity:.8"><span class="dot" id="dot"></span><span id="stxt">Local</span></div></div>
 <div class="hdr-r"><span class="badge" id="rBdg">Admin</span><button id="lout">Logout</button></div>
 </header>
 <div class="toast" id="tst"></div>
@@ -110,11 +107,11 @@ header h1{font-size:15px}
 
 <div class="pg on" id="p0">
 <div class="sg"><div class="sc"><div class="v" id="xT">0</div><div class="l">Total</div></div><div class="sc"><div class="v" id="xA">0</div><div class="l">Active</div></div><div class="sc dn"><div class="v" id="xB">0</div><div class="l">Blocked</div></div></div>
-<div class="cd"><h2>📋 Activity</h2><div id="feed"><div class="em">No activity</div></div></div>
+<div class="cd"><h2>📋 Recent Activity</h2><div id="feed"><div class="em">No activity</div></div></div>
 </div>
 
 <div class="pg" id="p1">
-<div class="cd"><h2>✅ Check In</h2>
+<div class="cd"><h2>✅ Check In Visitor</h2>
 <form id="ciF">
 <div class="f"><label>PHOTO</label><div class="pu" id="pua"><img class="pp" id="ppr"><span id="pi" style="font-size:24px">📷</span><span id="pt" style="font-size:10px;color:#666">Tap to capture</span><input type="file" id="ciPh" accept="image/*" capture="user"></div></div>
 <div class="f"><label>PLANT *</label><select id="ciPl" required><option value="">Select</option><option>JBM-04</option><option>ANTB PTR</option><option>JBMA PTR</option></select></div>
@@ -136,19 +133,19 @@ header h1{font-size:15px}
 
 <div class="pg" id="p3">
 <div class="sb"><input id="os" placeholder="Search active..."></div>
-<div id="ol"><div class="em">No active visitors</div></div>
+<div id="ol"><div class="em">No active</div></div>
 </div>
 
 <div class="pg" id="p4">
 <div class="cd">
 <h2>👨‍💼 Employees</h2>
 <div class="fc" id="ef"><span class="on" data-v="all">All</span><span data-v="JBM-04">JBM-04</span><span data-v="ANTB PTR">ANTB PTR</span><span data-v="JBMA PTR">JBMA PTR</span></div>
-<div class="ba" id="bAct" style="display:none"><label style="font-size:10px"><input type="checkbox" id="selAll"> Select All</label><span id="selC" style="font-size:10px;color:var(--p);font-weight:600">0</span><button class="bd bsm" id="delSel" style="display:none">🗑️ Delete Selected</button></div>
+<div class="ba" id="bAct" style="display:none"><label style="font-size:10px"><input type="checkbox" id="selAll"> Select All</label><span id="selC" style="font-size:10px;color:var(--p);font-weight:600"></span><button class="bd bsm" id="delSel" style="display:none">🗑️ Delete Selected</button></div>
 <div id="el"></div>
 </div>
-<div class="cd"><h2>📋 Bulk Upload</h2>
+<div class="cd"><h2>📋 Bulk Upload CSV</h2>
 <button class="btn b2 bsm" id="dlTpl">📥 Download Template</button>
-<div class="bup" id="csvA" style="margin-top:8px"><span style="font-size:20px">📄</span><br><span style="font-size:10px;color:#666">Upload CSV</span><input type="file" id="csvF" accept=".csv"></div>
+<div style="margin-top:8px;border:2px dashed #ddd;border-radius:8px;padding:12px;text-align:center;cursor:pointer;background:#fafafa" id="csvA"><span style="font-size:20px">📄</span><br><span style="font-size:10px;color:#666">Tap to upload CSV file</span><input type="file" id="csvF" accept=".csv" style="display:none"></div>
 <div id="csvPr"></div>
 </div>
 <div class="cd"><h2>➕ Add Employee</h2>
@@ -205,120 +202,233 @@ header h1{font-size:15px}
 
 <script>
 (function(){
-var FB="https://YOUR-PROJECT-ID-default-rtdb.firebaseio.com";
-var D={v:[],e:[],b:[],a:[],u:[]},user=null,sel=new Set(),eFilter="all",vFilter="all",curPh=null;
+// ============================================
+// FIREBASE URL — OPTIONAL! Leave as "" to use localStorage only
+// If set, data syncs to cloud. If blank or fails, uses localStorage.
+// ============================================
+var FB = "";
+// Example: var FB = "https://vms-pro-xxxxx-default-rtdb.firebaseio.com";
 
-function api(p,m,d){var o={method:m||"GET",headers:{"Content-Type":"application/json"}};if(d)o.body=JSON.stringify(d);return fetch(FB+"/"+p+".json",o).then(function(r){return r.json()}).catch(function(){return null})}
+// ===== STORAGE ENGINE (localStorage + optional Firebase) =====
+var DB = {
+  get: function(key) {
+    try { return JSON.parse(localStorage.getItem("vms_"+key) || "[]"); }
+    catch(e) { return []; }
+  },
+  set: function(key, data) {
+    localStorage.setItem("vms_"+key, JSON.stringify(data));
+    if(FB) { fetch(FB+"/"+key+".json",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(data)}).catch(function(){}); }
+  },
+  add: function(key, item) {
+    var arr = DB.get(key);
+    item.id = key[0].toUpperCase() + "-" + (Date.now()%100000);
+    arr.unshift(item);
+    DB.set(key, arr);
+    return item;
+  },
+  del: function(key, id) {
+    var arr = DB.get(key).filter(function(x){return x.id !== id});
+    DB.set(key, arr);
+  },
+  upd: function(key, id, updates) {
+    var arr = DB.get(key);
+    for(var i=0;i<arr.length;i++){if(arr[i].id===id){for(var k in updates)arr[i][k]=updates[k];break}}
+    DB.set(key, arr);
+  },
+  sync: function() {
+    if(!FB) return Promise.resolve(false);
+    return fetch(FB+"/.json").then(function(r){return r.json()}).then(function(d){
+      if(d){
+        if(d.visitors&&d.visitors.length) localStorage.setItem("vms_visitors",JSON.stringify(d.visitors));
+        if(d.employees&&d.employees.length) localStorage.setItem("vms_employees",JSON.stringify(d.employees));
+        if(d.blacklist&&d.blacklist.length) localStorage.setItem("vms_blacklist",JSON.stringify(d.blacklist));
+        if(d.users&&d.users.length) localStorage.setItem("vms_users",JSON.stringify(d.users));
+      }
+      return true;
+    }).catch(function(){return false});
+  }
+};
+
+// ===== INIT DEFAULT DATA =====
+function initDefaults(){
+  if(!DB.get("users").length){
+    DB.set("users",[{id:"U-1",u:"admin",p:"amit@1988",r:"Admin"},{id:"U-2",u:"reception",p:"pass123",r:"Reception"},{id:"U-3",u:"security",p:"guard123",r:"Security"}]);
+  }
+  if(!DB.get("employees").length){
+    var d=[["Rahul Sharma","Production","JBM-04","Manager"],["Suresh Verma","Quality","JBM-04","Engineer"],["Priya Patel","HR","JBM-04","HR Lead"],["Vikash Singh","Maintenance","JBM-04","Supervisor"],["Amit Kumar","Engineering","ANTB PTR","Sr. Engineer"],["Neha Gupta","Admin","ANTB PTR","Admin Head"],["Rajesh Yadav","Production","ANTB PTR","Shift Incharge"],["Deepak Tiwari","Safety","ANTB PTR","Safety Officer"],["Sanjay Mehta","Operations","JBMA PTR","Plant Head"],["Pooja Rawat","Quality","JBMA PTR","QA Engineer"],["Manoj Pandey","Store","JBMA PTR","Store Incharge"],["Kavita Joshi","Purchase","JBMA PTR","Purchase Officer"]];
+    var emps=d.map(function(e,i){return{id:"E-"+(100+i),name:e[0],dept:e[1],plant:e[2],desig:e[3]}});
+    DB.set("employees",emps);
+  }
+}
+initDefaults();
+
+// ===== HELPERS =====
+var user=null, sel=new Set(), eFilter="all", vFilter="all", curPh=null;
 function toast(m,t){var e=document.getElementById("tst");e.textContent=m;e.className="toast show"+(t==="e"?" er":t==="w"?" wr":"");setTimeout(function(){e.className="toast"},2500)}
 function ft(i){if(!i)return"—";return new Date(i).toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit"})}
 function ago(i){if(!i)return"";var d=Math.floor((Date.now()-new Date(i).getTime())/60000);return d<1?"Now":d<60?d+"m":d<1440?Math.floor(d/60)+"h":Math.floor(d/1440)+"d"}
 function compress(file,cb){var r=new FileReader();r.onload=function(e){var img=new Image();img.onload=function(){var w=img.width,h=img.height;if(w>250){h=h*(250/w);w=250}if(h>250){w=w*(250/h);h=250}var c=document.createElement("canvas");c.width=w;c.height=h;c.getContext("2d").drawImage(img,0,0,w,h);cb(c.toDataURL("image/jpeg",0.5))};img.src=e.target.result};r.readAsDataURL(file)}
 
-function load(){
-  return api("","GET").then(function(d){
-    if(!d)d={};
-    D.v=d.visitors?Object.keys(d.visitors).map(function(k){var x=d.visitors[k];x._k=k;return x}):[];
-    D.e=d.employees?Object.keys(d.employees).map(function(k){var x=d.employees[k];x._k=k;return x}):[];
-    D.b=d.blacklist?Object.keys(d.blacklist).map(function(k){var x=d.blacklist[k];x._k=k;return x}):[];
-    D.a=d.alerts?Object.keys(d.alerts).map(function(k){var x=d.alerts[k];x._k=k;return x}):[];
-    D.u=d.users?Object.keys(d.users).map(function(k){var x=d.users[k];x._k=k;return x}):[];
-    if(!D.u.length)initUsers();
-    if(!D.e.length)initEmp();
-    sel.clear();refresh();
-    document.getElementById("dot").className="dot";document.getElementById("stxt").textContent="Synced";
-  }).catch(function(){document.getElementById("dot").className="dot off";document.getElementById("stxt").textContent="Offline";toast("Offline mode","w")});
-}
-
-function initUsers(){var u=[{u:"admin",p:"amit@1988",r:"Admin"},{u:"reception",p:"pass123",r:"Reception"},{u:"security",p:"guard123",r:"Security"}];u.forEach(function(x){api("users","POST",x)});D.u=u}
-function initEmp(){var d=[["Rahul Sharma","Production","JBM-04","Manager"],["Suresh Verma","Quality","JBM-04","Engineer"],["Priya Patel","HR","JBM-04","HR Lead"],["Vikash Singh","Maintenance","JBM-04","Supervisor"],["Amit Kumar","Engineering","ANTB PTR","Sr. Engineer"],["Neha Gupta","Admin","ANTB PTR","Admin Head"],["Rajesh Yadav","Production","ANTB PTR","Shift Incharge"],["Deepak Tiwari","Safety","ANTB PTR","Safety Officer"],["Sanjay Mehta","Operations","JBMA PTR","Plant Head"],["Pooja Rawat","Quality","JBMA PTR","QA Engineer"],["Manoj Pandey","Store","JBMA PTR","Store Incharge"],["Kavita Joshi","Purchase","JBMA PTR","Purchase Officer"]];d.forEach(function(e){api("employees","POST",{name:e[0],dept:e[1],plant:e[2],desig:e[3]})})}
-
-// AUTH
-var s=localStorage.getItem("vms5");if(s)try{user=JSON.parse(s);showApp()}catch(e){}
+// ===== AUTH =====
+var s=localStorage.getItem("vms6_sess");if(s)try{user=JSON.parse(s);showApp()}catch(e){}
 
 document.getElementById("lForm").addEventListener("submit",function(e){
   e.preventDefault();
   var un=document.getElementById("lU").value.trim().toLowerCase(),pw=document.getElementById("lP").value;
-  api("users","GET").then(function(d){
-    var f=null;if(d)for(var k in d){if(d[k].u===un&&d[k].p===pw){f=d[k];f._k=k;break}}
-    if(!f){var fb=[{u:"admin",p:"amit@1988",r:"Admin"},{u:"reception",p:"pass123",r:"Reception"},{u:"security",p:"guard123",r:"Security"}];for(var i=0;i<fb.length;i++)if(fb[i].u===un&&fb[i].p===pw){f=fb[i];break}}
-    if(f){user=f;localStorage.setItem("vms5",JSON.stringify(f));document.getElementById("lErr").style.display="none";showApp()}
-    else document.getElementById("lErr").style.display="block";
-  });
+  var users=DB.get("users");
+  var found=null;
+  for(var i=0;i<users.length;i++){if(users[i].u===un&&users[i].p===pw){found=users[i];break}}
+  if(found){user=found;localStorage.setItem("vms6_sess",JSON.stringify(found));document.getElementById("lErr").style.display="none";showApp()}
+  else{document.getElementById("lErr").style.display="block"}
 });
 
-document.getElementById("lout").addEventListener("click",function(){user=null;localStorage.removeItem("vms5");document.getElementById("app").classList.remove("show");document.getElementById("login").classList.remove("hide")});
+document.getElementById("lout").addEventListener("click",function(){user=null;localStorage.removeItem("vms6_sess");document.getElementById("app").classList.remove("show");document.getElementById("login").classList.remove("hide")});
 
-function showApp(){document.getElementById("login").classList.add("hide");document.getElementById("app").classList.add("show");document.getElementById("rBdg").textContent=user.r;if(user.r==="Admin")document.getElementById("bAct").style.display="flex";load()}
+function showApp(){
+  document.getElementById("login").classList.add("hide");
+  document.getElementById("app").classList.add("show");
+  document.getElementById("rBdg").textContent=user.r;
+  if(user.r==="Admin")document.getElementById("bAct").style.display="flex";
+  // Try cloud sync
+  DB.sync().then(function(ok){
+    document.getElementById("dot").className="dot"+(ok?"":" off");
+    document.getElementById("stxt").textContent=ok?"Cloud Synced":"Local Storage";
+    refresh();
+  });
+  refresh();
+}
 
-// NAV
-document.getElementById("nav").addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;var all=document.querySelectorAll(".nav button");for(var i=0;i<all.length;i++)all[i].classList.remove("on");b.classList.add("on");var pgs=document.querySelectorAll(".pg");for(var i=0;i<pgs.length;i++)pgs[i].classList.remove("on");document.getElementById(b.dataset.p).classList.add("on");refresh()});
+// ===== NAV =====
+document.getElementById("nav").addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;document.querySelectorAll(".nav button").forEach(function(x){x.classList.remove("on")});b.classList.add("on");document.querySelectorAll(".pg").forEach(function(x){x.classList.remove("on")});document.getElementById(b.dataset.p).classList.add("on");refresh()});
 
-// PHOTO
+// ===== PHOTO =====
 document.getElementById("pua").addEventListener("click",function(){document.getElementById("ciPh").click()});
 document.getElementById("ciPh").addEventListener("change",function(e){var f=e.target.files[0];if(!f)return;compress(f,function(c){curPh=c;document.getElementById("ppr").src=c;document.getElementById("ppr").classList.add("sh");document.getElementById("pi").style.display="none";document.getElementById("pt").textContent="✅ Ready"})});
 function rstPh(){curPh=null;document.getElementById("ppr").src="";document.getElementById("ppr").classList.remove("sh");document.getElementById("pi").style.display="";document.getElementById("pt").textContent="Tap to capture";document.getElementById("ciPh").value=""}
 
-// PLANT→HOST
-document.getElementById("ciPl").addEventListener("change",function(){var p=this.value,h=document.getElementById("ciH");if(!p){h.innerHTML='<option value="">Select plant first</option>';return}var em=D.e.filter(function(x){return x.plant===p});h.innerHTML='<option value="">Select</option>'+em.map(function(x){return"<option>"+x.name+" — "+x.dept+"</option>"}).join("")});
+// ===== PLANT→HOST =====
+document.getElementById("ciPl").addEventListener("change",function(){var p=this.value,h=document.getElementById("ciH");if(!p){h.innerHTML='<option value="">Select plant first</option>';return}var em=DB.get("employees").filter(function(x){return x.plant===p});h.innerHTML='<option value="">Select Host</option>'+em.map(function(x){return"<option>"+x.name+" — "+x.dept+"</option>"}).join("")});
 
-// DASHBOARD
-function rDash(){var v=D.v;document.getElementById("xT").textContent=v.length;document.getElementById("xA").textContent=v.filter(function(x){return x.status==="checked_in"}).length;document.getElementById("xB").textContent=v.filter(function(x){return x.status==="blocked"}).length;var rc=v.sort(function(a,b){return(b.ts||"").localeCompare(a.ts||"")}).slice(0,6);document.getElementById("feed").innerHTML=rc.length?rc.map(function(v){return'<div class="vi"><div class="av '+(v.status==="checked_in"?"ac":"bl")+'">'+(v.status==="checked_in"?"✅":"🚪")+'</div><div class="inf"><div class="n">'+v.name+'</div><div class="m">'+(v.plant||"")+" · "+ago(v.ts)+"</div></div></div>"}).join(""):'<div class="em">No activity</div>'}
+// ===== DASHBOARD =====
+function rDash(){
+  var v=DB.get("visitors");
+  document.getElementById("xT").textContent=v.length;
+  document.getElementById("xA").textContent=v.filter(function(x){return x.status==="checked_in"}).length;
+  document.getElementById("xB").textContent=v.filter(function(x){return x.status==="blocked"}).length;
+  var rc=v.slice(0,6);
+  document.getElementById("feed").innerHTML=rc.length?rc.map(function(x){return'<div class="vi"><div class="av '+(x.status==="checked_in"?"ac":"")+'">'+( x.status==="checked_in"?"✅":x.status==="blocked"?"🚫":"🚪")+'</div><div class="inf"><div class="n">'+x.name+" · "+(x.status==="checked_in"?"IN":x.status==="blocked"?"BLOCKED":"OUT")+'</div><div class="m">'+(x.plant||"")+" · "+(x.host||"")+" · "+ago(x.ts)+"</div></div></div>"}).join(""):'<div class="em">No activity</div>';
+}
 
-// CHECK IN
+// ===== CHECK IN =====
 document.getElementById("ciF").addEventListener("submit",function(e){
-  e.preventDefault();var name=document.getElementById("ciN").value.trim(),phone=document.getElementById("ciPn").value.trim(),plant=document.getElementById("ciPl").value;
-  var sec=null;for(var i=0;i<D.b.length;i++){var x=D.b[i];if((x.name||"").toLowerCase()===name.toLowerCase()||(x.phone||"")===phone){sec=x;break}}
-  if(sec&&sec.type==="blacklist"){toast("🚫 BLOCKED: "+name,"e");api("visitors","POST",{name:name,phone:phone,plant:plant,status:"blocked",ts:new Date().toISOString(),photo:curPh||""});this.reset();rstPh();setTimeout(load,500);return}
-  if(sec&&sec.type==="watchlist")toast("⚠️ Watchlisted","w");
-  var rec={name:name,phone:phone,email:document.getElementById("ciEm").value.trim(),company:document.getElementById("ciCo").value.trim(),host:document.getElementById("ciH").value,purpose:document.getElementById("ciPu").value,id_type:document.getElementById("ciIt").value,id_number:document.getElementById("ciId").value.trim(),plant:plant,laptop:document.getElementById("ciLp").value,status:"checked_in",cin:new Date().toISOString(),cout:"",photo:curPh||"",ts:new Date().toISOString()};
-  api("visitors","POST",rec).then(function(){toast("✅ "+name+" in!");load()});this.reset();rstPh();
+  e.preventDefault();
+  var name=document.getElementById("ciN").value.trim(),phone=document.getElementById("ciPn").value.trim(),plant=document.getElementById("ciPl").value;
+  // Security check
+  var blist=DB.get("blacklist"),sec=null;
+  for(var i=0;i<blist.length;i++){if((blist[i].name||"").toLowerCase()===name.toLowerCase()||(blist[i].phone||"")===phone){sec=blist[i];break}}
+  if(sec&&sec.type==="blacklist"){toast("🚫 BLOCKED: "+name,"e");DB.add("visitors",{name:name,phone:phone,plant:plant,status:"blocked",ts:new Date().toISOString(),photo:curPh||""});this.reset();rstPh();refresh();return}
+  if(sec&&sec.type==="watchlist")toast("⚠️ Watchlisted!","w");
+  DB.add("visitors",{name:name,phone:phone,email:document.getElementById("ciEm").value.trim(),company:document.getElementById("ciCo").value.trim(),host:document.getElementById("ciH").value,purpose:document.getElementById("ciPu").value,id_type:document.getElementById("ciIt").value,id_number:document.getElementById("ciId").value.trim(),plant:plant,laptop:document.getElementById("ciLp").value,status:"checked_in",cin:new Date().toISOString(),cout:"",photo:curPh||"",ts:new Date().toISOString()});
+  toast("✅ "+name+" checked in!");this.reset();rstPh();refresh();
 });
 
-// VISITORS
-function rVis(){var q=(document.getElementById("vs").value||"").toLowerCase();var r=D.v.slice();if(vFilter!=="all")r=r.filter(function(x){return x.status===vFilter});if(q)r=r.filter(function(x){return(x.name||"").toLowerCase().indexOf(q)>-1||(x.phone||"").indexOf(q)>-1});r.sort(function(a,b){return(b.ts||"").localeCompare(a.ts||"")});document.getElementById("vl").innerHTML=r.length?r.map(function(x){var av=x.photo?'<img src="'+x.photo+'">':x.status==="checked_in"?"✅":"🚪";return'<div class="vi"><div class="av '+(x.status==="checked_in"?"ac":"")+'">'+av+'</div><div class="inf"><div class="n">'+x.name+'</div><div class="m">'+(x.plant||"")+" · "+(x.host||"")+" · "+ft(x.cin)+'</div></div><span class="tg '+(x.status==="checked_in"?"tg-a":x.status==="blocked"?"tg-b":"tg-o")+'">'+(x.status==="checked_in"?"In":x.status==="blocked"?"Blk":"Out")+"</span></div>"}).join(""):'<div class="em">No visitors</div>'}
+// ===== VISITORS =====
+function rVis(){
+  var q=(document.getElementById("vs").value||"").toLowerCase();
+  var r=DB.get("visitors");
+  if(vFilter!=="all")r=r.filter(function(x){return x.status===vFilter});
+  if(q)r=r.filter(function(x){return(x.name||"").toLowerCase().indexOf(q)>-1||(x.phone||"").indexOf(q)>-1||(x.plant||"").toLowerCase().indexOf(q)>-1});
+  document.getElementById("vl").innerHTML=r.length?r.map(function(x){var av=x.photo?'<img src="'+x.photo+'">':x.status==="checked_in"?"✅":"🚪";return'<div class="vi"><div class="av '+(x.status==="checked_in"?"ac":x.status==="blocked"?"bl":"")+'">'+av+'</div><div class="inf"><div class="n">'+x.name+'</div><div class="m">'+(x.plant||"")+" · "+(x.host||"")+" · "+ft(x.cin)+'</div></div><span class="tg '+(x.status==="checked_in"?"tg-a":x.status==="blocked"?"tg-b":"tg-o")+'">'+(x.status==="checked_in"?"In":x.status==="blocked"?"Blk":"Out")+"</span></div>"}).join(""):'<div class="em">No visitors</div>';
+}
 document.getElementById("vs").addEventListener("input",rVis);
-document.getElementById("vf").addEventListener("click",function(e){var s=e.target.closest("span");if(!s)return;var all=document.querySelectorAll("#vf span");for(var i=0;i<all.length;i++)all[i].classList.remove("on");s.classList.add("on");vFilter=s.dataset.v;rVis()});
+document.getElementById("vf").addEventListener("click",function(e){var s=e.target.closest("span");if(!s)return;document.querySelectorAll("#vf span").forEach(function(x){x.classList.remove("on")});s.classList.add("on");vFilter=s.dataset.v;rVis()});
 
-// CHECK OUT
-function rOut(){var q=(document.getElementById("os").value||"").toLowerCase();var a=D.v.filter(function(x){return x.status==="checked_in"});if(q)a=a.filter(function(x){return x.name.toLowerCase().indexOf(q)>-1});document.getElementById("ol").innerHTML=a.length?a.map(function(x){return'<div class="vi"><div class="av ac">✅</div><div class="inf"><div class="n">'+x.name+'</div><div class="m">'+(x.plant||"")+" · "+ft(x.cin)+'</div></div><button class="btn bd bsm" onclick="OUT(\''+x._k+"')\">Out</button></div>"}).join(""):'<div class="em">No active</div>'}
+// ===== CHECK OUT =====
+function rOut(){
+  var q=(document.getElementById("os").value||"").toLowerCase();
+  var a=DB.get("visitors").filter(function(x){return x.status==="checked_in"});
+  if(q)a=a.filter(function(x){return x.name.toLowerCase().indexOf(q)>-1});
+  document.getElementById("ol").innerHTML=a.length?a.map(function(x){return'<div class="vi"><div class="av ac">✅</div><div class="inf"><div class="n">'+x.name+'</div><div class="m">'+(x.plant||"")+" · "+ft(x.cin)+'</div></div><button class="btn bd bsm" onclick="COUT(\''+x.id+"')\">Out</button></div>"}).join(""):'<div class="em">No active</div>';
+}
 document.getElementById("os").addEventListener("input",rOut);
-window.OUT=function(k){api("visitors/"+k+"/status","PUT","checked_out").then(function(){api("visitors/"+k+"/cout","PUT",new Date().toISOString()).then(function(){toast("🚪 Out!");load()})})};
+window.COUT=function(id){DB.upd("visitors",id,{status:"checked_out",cout:new Date().toISOString()});toast("🚪 Checked out!");refresh()};
 
-// EMPLOYEES
-function rEmp(){var em=eFilter==="all"?D.e:D.e.filter(function(x){return x.plant===eFilter});var isA=user&&user.r==="Admin";document.getElementById("selAll").checked=false;updSel();document.getElementById("el").innerHTML=em.length?em.map(function(x){var ini=x.name.split(" ").map(function(w){return w[0]}).join("").slice(0,2);var chk=isA?'<input type="checkbox" class="ec" data-k="'+x._k+'"'+(sel.has(x._k)?" checked":"")+'style="width:16px;height:16px;accent-color:var(--p)">':"";return'<div class="vi">'+chk+'<div class="av">'+ini+'</div><div class="inf"><div class="n">'+x.name+'</div><div class="m">'+x.dept+(x.desig?" · "+x.desig:"")+" · 🏭"+x.plant+'</div></div>'+(isA?'<button class="btn bd bsm" onclick="DELE(\''+x._k+"')\">🗑️</button>":"")+"</div>"}).join(""):'<div class="em">No employees</div>';document.querySelectorAll(".ec").forEach(function(c){c.addEventListener("change",function(){if(this.checked)sel.add(this.dataset.k);else sel.delete(this.dataset.k);updSel()})})}
-document.getElementById("ef").addEventListener("click",function(e){var s=e.target.closest("span");if(!s)return;var all=document.querySelectorAll("#ef span");for(var i=0;i<all.length;i++)all[i].classList.remove("on");s.classList.add("on");eFilter=s.dataset.v;sel.clear();rEmp()});
-document.getElementById("selAll").addEventListener("change",function(){var em=eFilter==="all"?D.e:D.e.filter(function(x){return x.plant===eFilter});sel.clear();if(this.checked)em.forEach(function(x){if(x._k)sel.add(x._k)});document.querySelectorAll(".ec").forEach(function(c){c.checked=document.getElementById("selAll").checked});updSel()});
-function updSel(){document.getElementById("selC").textContent=sel.size+" selected";document.getElementById("delSel").style.display=sel.size>0?"inline-block":"none"}
-document.getElementById("delSel").addEventListener("click",function(){if(!sel.size)return;if(!confirm("Delete "+sel.size+" employees?"))return;var p=[];sel.forEach(function(k){p.push(api("employees/"+k,"DELETE"))});Promise.all(p).then(function(){toast("🗑️ "+sel.size+" deleted!");sel.clear();load()})});
-window.DELE=function(k){if(confirm("Delete?")){api("employees/"+k,"DELETE").then(function(){toast("Removed");load()})}};
-document.getElementById("eF").addEventListener("submit",function(e){e.preventDefault();api("employees","POST",{name:document.getElementById("eN").value.trim(),dept:document.getElementById("eD").value,plant:document.getElementById("ePl").value,desig:document.getElementById("eDg").value.trim(),phone:document.getElementById("ePh").value.trim()}).then(function(){toast("👨‍💼 Added!");load()});this.reset()});
+// ===== EMPLOYEES =====
+function rEmp(){
+  var em=DB.get("employees");
+  if(eFilter!=="all")em=em.filter(function(x){return x.plant===eFilter});
+  var isA=user&&user.r==="Admin";
+  document.getElementById("selAll").checked=false;sel.clear();updSel();
+  document.getElementById("el").innerHTML=em.length?em.map(function(x){
+    var ini=(x.name||"").split(" ").map(function(w){return w[0]}).join("").slice(0,2);
+    var chk=isA?'<input type="checkbox" class="ec" data-id="'+x.id+'" style="width:16px;height:16px;accent-color:var(--p)">':"";
+    return'<div class="vi">'+chk+'<div class="av">'+ini+'</div><div class="inf"><div class="n">'+x.name+'</div><div class="m">'+(x.dept||"")+(x.desig?" · "+x.desig:"")+" · 🏭"+(x.plant||"")+'</div></div>'+(isA?'<button class="btn bd bsm" onclick="DELE(\''+x.id+"')\">🗑️</button>":"")+"</div>"
+  }).join(""):'<div class="em">No employees</div>';
+  document.querySelectorAll(".ec").forEach(function(c){c.addEventListener("change",function(){if(this.checked)sel.add(this.dataset.id);else sel.delete(this.dataset.id);updSel()})});
+}
+document.getElementById("ef").addEventListener("click",function(e){var s=e.target.closest("span");if(!s)return;document.querySelectorAll("#ef span").forEach(function(x){x.classList.remove("on")});s.classList.add("on");eFilter=s.dataset.v;sel.clear();rEmp()});
+document.getElementById("selAll").addEventListener("change",function(){var em=DB.get("employees");if(eFilter!=="all")em=em.filter(function(x){return x.plant===eFilter});sel.clear();if(this.checked)em.forEach(function(x){sel.add(x.id)});document.querySelectorAll(".ec").forEach(function(c){c.checked=this.checked}.bind(this));updSel()});
+function updSel(){document.getElementById("selC").textContent=sel.size?sel.size+" selected":"";document.getElementById("delSel").style.display=sel.size?"inline-block":"none"}
+document.getElementById("delSel").addEventListener("click",function(){if(!sel.size)return;if(!confirm("Delete "+sel.size+" employees?"))return;sel.forEach(function(id){DB.del("employees",id)});toast("🗑️ "+sel.size+" deleted!");sel.clear();refresh()});
+window.DELE=function(id){if(confirm("Delete?")){DB.del("employees",id);toast("Removed");refresh()}};
+document.getElementById("eF").addEventListener("submit",function(e){e.preventDefault();DB.add("employees",{name:document.getElementById("eN").value.trim(),dept:document.getElementById("eD").value,plant:document.getElementById("ePl").value,desig:document.getElementById("eDg").value.trim(),phone:document.getElementById("ePh").value.trim()});toast("👨‍💼 Employee added!");this.reset();refresh()});
 
-// CSV TEMPLATE
-document.getElementById("dlTpl").addEventListener("click",function(){var c="Name,Department,Plant,Designation,Phone\nRahul Sharma,Production,JBM-04,Manager,9876543210\nNeha Gupta,HR,ANTB PTR,HR Lead,9876543211\n";var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([c],{type:"text/csv"}));a.download="employee_template.csv";a.click();toast("📥 Template!")});
+// ===== CSV =====
+document.getElementById("dlTpl").addEventListener("click",function(){var c="Name,Department,Plant,Designation,Phone\nRahul Sharma,Production,JBM-04,Manager,9876543210\nNeha Gupta,HR,ANTB PTR,HR Lead,9876543211\nSanjay Mehta,Operations,JBMA PTR,Plant Head,9876543212\n";var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([c],{type:"text/csv"}));a.download="employee_template.csv";a.click();toast("📥 Template downloaded!")});
 document.getElementById("csvA").addEventListener("click",function(){document.getElementById("csvF").click()});
-document.getElementById("csvF").addEventListener("change",function(e){var f=e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(ev){var lines=ev.target.result.split(/\r?\n/).filter(function(l){return l.trim()});var start=lines[0].toLowerCase().indexOf("name")>-1?1:0;var recs=[];for(var i=start;i<lines.length;i++){var c=lines[i].split(",").map(function(x){return x.trim()});if(c[0])recs.push({name:c[0],dept:c[1]||"",plant:c[2]||"",desig:c[3]||"",phone:c[4]||""})}if(!recs.length){toast("Empty CSV","e");return}document.getElementById("csvPr").innerHTML='<div class="cd"><b>'+recs.length+' employees found</b><br><button class="btn bs bsm" style="margin-top:6px" id="cfUp">✅ Upload All</button> <button class="btn b2 bsm" id="cnUp">Cancel</button></div>';document.getElementById("cfUp").onclick=function(){var p=recs.map(function(x){return api("employees","POST",x)});Promise.all(p).then(function(){toast("✅ "+recs.length+" uploaded!");document.getElementById("csvPr").innerHTML="";load()})};document.getElementById("cnUp").onclick=function(){document.getElementById("csvPr").innerHTML=""}};r.readAsText(f)});
+document.getElementById("csvF").addEventListener("change",function(e){
+  var f=e.target.files[0];if(!f)return;
+  var r=new FileReader();r.onload=function(ev){
+    var lines=ev.target.result.split(/\r?\n/).filter(function(l){return l.trim()});
+    var start=lines[0].toLowerCase().indexOf("name")>-1?1:0;
+    var recs=[];
+    for(var i=start;i<lines.length;i++){var c=lines[i].split(",").map(function(x){return x.trim()});if(c[0])recs.push({name:c[0],dept:c[1]||"",plant:c[2]||"",desig:c[3]||"",phone:c[4]||""})}
+    if(!recs.length){toast("Empty file","e");return}
+    document.getElementById("csvPr").innerHTML='<div class="cd" style="border-color:var(--s)"><b style="color:var(--s)">✅ '+recs.length+' employees found:</b><div style="max-height:150px;overflow-y:auto;margin:6px 0">'+recs.map(function(r){return'<div style="font-size:10px;padding:3px 0;border-bottom:1px solid #f0f0f0">'+r.name+" · "+r.dept+" · "+r.plant+"</div>"}).join("")+'</div><button class="btn bs bsm" id="cfUp">✅ Upload All</button> <button class="btn b2 bsm" id="cnUp">Cancel</button></div>';
+    document.getElementById("cfUp").onclick=function(){recs.forEach(function(r){DB.add("employees",r)});toast("✅ "+recs.length+" employees uploaded!");document.getElementById("csvPr").innerHTML="";refresh()};
+    document.getElementById("cnUp").onclick=function(){document.getElementById("csvPr").innerHTML=""};
+  };r.readAsText(f);
+});
 
-// SECURITY
-document.getElementById("bF").addEventListener("submit",function(e){e.preventDefault();api("blacklist","POST",{name:document.getElementById("bN").value.trim(),phone:document.getElementById("bPh").value.trim(),type:document.getElementById("bT").value,reason:document.getElementById("bR").value.trim(),ts:new Date().toISOString()}).then(function(){toast("🛡️ Added!");load()});this.reset()});
-function rSec(){var bl=D.b.filter(function(x){return x.type==="blacklist"}),wl=D.b.filter(function(x){return x.type==="watchlist"});document.getElementById("blL").innerHTML=bl.length?bl.map(function(x){return'<div class="vi"><div class="av bl">🚫</div><div class="inf"><div class="n">'+x.name+'</div><div class="m">'+x.reason+'</div></div><button class="btn b2 bsm" onclick="RMS(\''+x._k+"')\">✕</button></div>"}).join(""):'<div class="em">None</div>';document.getElementById("wlL").innerHTML=wl.length?wl.map(function(x){return'<div class="vi"><div class="av" style="background:#ffedd5">⚠️</div><div class="inf"><div class="n">'+x.name+'</div><div class="m">'+x.reason+'</div></div><button class="btn b2 bsm" onclick="RMS(\''+x._k+"')\">✕</button></div>"}).join(""):'<div class="em">None</div>'}
-window.RMS=function(k){if(confirm("Remove?")){api("blacklist/"+k,"DELETE").then(function(){toast("Removed");load()})}};
+// ===== SECURITY =====
+document.getElementById("bF").addEventListener("submit",function(e){e.preventDefault();DB.add("blacklist",{name:document.getElementById("bN").value.trim(),phone:document.getElementById("bPh").value.trim(),type:document.getElementById("bT").value,reason:document.getElementById("bR").value.trim(),ts:new Date().toISOString()});toast("🛡️ Added!");this.reset();refresh()});
+function rSec(){
+  var bl=DB.get("blacklist");
+  var bk=bl.filter(function(x){return x.type==="blacklist"}),wl=bl.filter(function(x){return x.type==="watchlist"});
+  document.getElementById("blL").innerHTML=bk.length?bk.map(function(x){return'<div class="vi"><div class="av bl">🚫</div><div class="inf"><div class="n">'+x.name+'</div><div class="m">'+(x.reason||"")+'</div></div><button class="btn b2 bsm" onclick="RMS(\''+x.id+"')\">✕</button></div>"}).join(""):'<div class="em">None</div>';
+  document.getElementById("wlL").innerHTML=wl.length?wl.map(function(x){return'<div class="vi"><div class="av" style="background:#ffedd5">⚠️</div><div class="inf"><div class="n">'+x.name+'</div><div class="m">'+(x.reason||"")+'</div></div><button class="btn b2 bsm" onclick="RMS(\''+x.id+"')\">✕</button></div>"}).join(""):'<div class="em">None</div>';
+}
+window.RMS=function(id){if(confirm("Remove?")){DB.del("blacklist",id);toast("Removed");refresh()}};
 
-// REPORTS
-function rRpt(){var per=document.getElementById("rPer").value,pf=document.getElementById("rPl").value;var r=D.v.slice(),now=new Date();if(per==="today")r=r.filter(function(x){return(x.ts||"").slice(0,10)===now.toISOString().slice(0,10)});else if(per==="week")r=r.filter(function(x){return(x.ts||"")>=new Date(now-7*864e5).toISOString()});else if(per==="month")r=r.filter(function(x){return(x.ts||"")>=new Date(now-30*864e5).toISOString()});if(pf!=="all")r=r.filter(function(x){return x.plant===pf});var t=r.length,a=r.filter(function(x){return x.status==="checked_in"}).length,o=r.filter(function(x){return x.status==="checked_out"}).length,b=r.filter(function(x){return x.status==="blocked"}).length;document.getElementById("rS").innerHTML='<div class="rr"><span class="rl">Total</span><span class="rv">'+t+'</span></div><div class="rr"><span class="rl">Active</span><span class="rv">'+a+'</span></div><div class="rr"><span class="rl">Out</span><span class="rv">'+o+'</span></div><div class="rr"><span class="rl">Blocked</span><span class="rv">'+b+'</span></div>';var cl=["#1a73e8","#15803d","#ea580c","#dc2626","#7c3aed"];var pu={};r.forEach(function(x){if(x.purpose)pu[x.purpose]=(pu[x.purpose]||0)+1});var pa=Object.entries(pu).sort(function(a,b){return b[1]-a[1]}),mp=pa.length?pa[0][1]:1;document.getElementById("rP").innerHTML=pa.length?pa.map(function(p,i){return'<div class="rb"><div class="rbl"><span>'+p[0]+"</span><span>"+p[1]+'</span></div><div class="rbt"><div class="rbf" style="width:'+p[1]/mp*100+"%;background:"+cl[i%5]+'"></div></div></div>'}).join(""):'<div class="em">No data</div>'}
+// ===== REPORTS =====
+function rRpt(){
+  var per=document.getElementById("rPer").value,pf=document.getElementById("rPl").value;
+  var r=DB.get("visitors"),now=new Date();
+  if(per==="today")r=r.filter(function(x){return(x.ts||"").slice(0,10)===now.toISOString().slice(0,10)});
+  else if(per==="week")r=r.filter(function(x){return(x.ts||"")>=new Date(now-7*864e5).toISOString()});
+  else if(per==="month")r=r.filter(function(x){return(x.ts||"")>=new Date(now-30*864e5).toISOString()});
+  if(pf!=="all")r=r.filter(function(x){return x.plant===pf});
+  var t=r.length,a=r.filter(function(x){return x.status==="checked_in"}).length,o=r.filter(function(x){return x.status==="checked_out"}).length,b=r.filter(function(x){return x.status==="blocked"}).length;
+  document.getElementById("rS").innerHTML='<div class="rr"><span class="rl">Total Visitors</span><span class="rv">'+t+'</span></div><div class="rr"><span class="rl">Active Now</span><span class="rv">'+a+'</span></div><div class="rr"><span class="rl">Checked Out</span><span class="rv">'+o+'</span></div><div class="rr"><span class="rl">Blocked</span><span class="rv">'+b+'</span></div><div class="rr"><span class="rl">Employees</span><span class="rv">'+DB.get("employees").length+'</span></div>';
+  var cl=["#1a73e8","#15803d","#ea580c","#dc2626","#7c3aed"];
+  var pu={};r.forEach(function(x){if(x.purpose)pu[x.purpose]=(pu[x.purpose]||0)+1});
+  var pa=Object.entries(pu).sort(function(a,b){return b[1]-a[1]}),mp=pa.length?pa[0][1]:1;
+  document.getElementById("rP").innerHTML=pa.length?pa.map(function(p,i){return'<div class="rb"><div class="rbl"><span>'+p[0]+"</span><span>"+p[1]+'</span></div><div class="rbt"><div class="rbf" style="width:'+p[1]/mp*100+"%;background:"+cl[i%5]+'"></div></div></div>'}).join(""):'<div class="em">No data yet</div>';
+}
 document.getElementById("rPer").addEventListener("change",rRpt);
 document.getElementById("rPl").addEventListener("change",rRpt);
 
-// EXPORT
-document.getElementById("exC").addEventListener("click",function(){var r=D.v;if(!r.length){toast("No data","e");return}var c="Name,Phone,Company,Host,Purpose,Plant,Status,In,Out\n";r.forEach(function(v){c+=v.name+","+(v.phone||"")+","+(v.company||"")+","+(v.host||"")+","+(v.purpose||"")+","+(v.plant||"")+","+v.status+","+(v.cin||"")+","+(v.cout||"")+"\n"});var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([c],{type:"text/csv"}));a.download="vms_export.csv";a.click();toast("📥 Done!")});
-document.getElementById("exT").addEventListener("click",function(){var r=D.v;var t="VMS REPORT — "+new Date().toLocaleString()+"\n"+r.length+" visitors\n================\n";r.forEach(function(v){t+=v.name+" | "+(v.plant||"")+" | "+v.status+"\n"});var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([t]));a.download="vms_report.txt";a.click();toast("📊 Done!")});
+// ===== EXPORT =====
+document.getElementById("exC").addEventListener("click",function(){var r=DB.get("visitors");if(!r.length){toast("No data","e");return}var c="Name,Phone,Company,Host,Purpose,Plant,Status,CheckIn,CheckOut\n";r.forEach(function(v){c+=v.name+","+(v.phone||"")+","+(v.company||"")+","+(v.host||"")+","+(v.purpose||"")+","+(v.plant||"")+","+v.status+","+(v.cin||"")+","+(v.cout||"")+"\n"});var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([c],{type:"text/csv"}));a.download="vms_export_"+new Date().toISOString().slice(0,10)+".csv";a.click();toast("📥 CSV exported!")});
+document.getElementById("exT").addEventListener("click",function(){var r=DB.get("visitors");var t="═══ VMS REPORT ═══\nDate: "+new Date().toLocaleString()+"\nPlants: JBM-04 | ANTB PTR | JBMA PTR\nTotal: "+r.length+"\n══════════════════\n";r.forEach(function(v){t+=v.name+" | "+(v.plant||"")+" | "+(v.purpose||"")+" | "+v.status+"\n"});var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([t]));a.download="vms_report_"+new Date().toISOString().slice(0,10)+".txt";a.click();toast("📊 Report exported!")});
 
-// PASSWORD
-document.getElementById("pwF").addEventListener("submit",function(e){e.preventDefault();var o=document.getElementById("pwO").value,n=document.getElementById("pwN").value,c=document.getElementById("pwC").value;if(o!==user.p){toast("Wrong password","e");return}if(n!==c){toast("Don't match","e");return}if(user._k)api("users/"+user._k+"/p","PUT",n);user.p=n;localStorage.setItem("vms5",JSON.stringify(user));toast("✅ Changed!");this.reset()});
-function rUsers(){document.getElementById("uL").innerHTML=user&&user.r==="Admin"?D.u.map(function(x){return'<div class="vi"><div class="av">'+x.r[0]+'</div><div class="inf"><div class="n">'+x.u+'</div><div class="m">'+x.r+'</div></div><button class="btn b2 bsm" onclick="RPWD(\''+x._k+"','"+x.u+"')\">Reset</button></div>"}).join(""):'<div class="em">Admin only</div>'}
-window.RPWD=function(k,u){var n=prompt("New password for "+u+":");if(n&&n.length>=4){api("users/"+k+"/p","PUT",n).then(function(){toast("✅ Reset!")})}};
+// ===== PASSWORD =====
+document.getElementById("pwF").addEventListener("submit",function(e){e.preventDefault();var o=document.getElementById("pwO").value,n=document.getElementById("pwN").value,c=document.getElementById("pwC").value;if(o!==user.p){toast("Wrong password","e");return}if(n!==c){toast("Passwords don't match","e");return}if(n.length<4){toast("Min 4 characters","e");return}var users=DB.get("users");for(var i=0;i<users.length;i++){if(users[i].u===user.u){users[i].p=n;break}}DB.set("users",users);user.p=n;localStorage.setItem("vms6_sess",JSON.stringify(user));toast("✅ Password updated!");this.reset()});
+function rUsers(){var users=DB.get("users");document.getElementById("uL").innerHTML=user&&user.r==="Admin"?users.map(function(x){return'<div class="vi"><div class="av">'+x.r[0]+'</div><div class="inf"><div class="n">'+x.u+'</div><div class="m">'+x.r+'</div></div><button class="btn b2 bsm" onclick="RPWD(\''+x.id+"','"+x.u+"')\">Reset</button></div>"}).join(""):'<div class="em">Admin only</div>'}
+window.RPWD=function(id,un){var n=prompt("New password for "+un+":");if(n&&n.length>=4){var users=DB.get("users");for(var i=0;i<users.length;i++){if(users[i].id===id){users[i].p=n;break}}DB.set("users",users);toast("✅ Password reset for "+un)}};
 
+// ===== REFRESH ALL =====
 function refresh(){rDash();rVis();rOut();rEmp();rSec();rRpt();rUsers()}
-setInterval(function(){load()},30000);
 })();
 </script>
 </body>
