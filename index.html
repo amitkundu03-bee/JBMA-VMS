@@ -93,7 +93,6 @@ header h1{font-size:15px}
 <div style="font-size:40px">🏢</div>
 <h1>VMS Pro</h1>
 <p>Visitor Management System</p>
-
 <div id="loginPanel">
 <form id="lForm">
 <div class="f"><label>USERNAME</label><input id="lU" required placeholder="Username" autocomplete="off"></div>
@@ -103,7 +102,6 @@ header h1{font-size:15px}
 </form>
 <span class="forgot" id="forgotLink">🔑 Forgot Password?</span>
 </div>
-
 <div id="forgotPanel">
 <span class="back-link" id="backLogin">← Back to Login</span>
 <h2 style="font-size:16px;margin-bottom:4px">🔑 Reset Password</h2>
@@ -112,7 +110,6 @@ header h1{font-size:15px}
 <div id="fpErr" style="color:var(--d);font-size:10px;display:none;margin-bottom:6px"></div>
 <button class="lbtn" id="sendOtpBtn">📧 Send OTP to Email</button>
 </div>
-
 <div id="otpPanel">
 <span class="back-link" id="backForgot">← Back</span>
 <h2 style="font-size:16px;margin-bottom:4px">📧 Enter OTP</h2>
@@ -122,7 +119,6 @@ header h1{font-size:15px}
 <button class="lbtn" id="verifyOtpBtn">✅ Verify OTP</button>
 <p style="font-size:9px;color:#999;margin-top:8px">Didn't receive? <span class="forgot" id="resendOtp" style="font-size:9px">Resend OTP</span></p>
 </div>
-
 <div id="newPwdPanel">
 <h2 style="font-size:16px;margin-bottom:4px">🔒 Set New Password</h2>
 <div class="f"><label>NEW PASSWORD</label><input id="npNew" type="password" placeholder="Min 4 characters"></div>
@@ -130,7 +126,6 @@ header h1{font-size:15px}
 <div id="npErr" style="color:var(--d);font-size:10px;display:none;margin-bottom:6px"></div>
 <button class="lbtn" id="resetPwdBtn">🔒 Reset Password</button>
 </div>
-
 </div>
 </div>
 
@@ -246,31 +241,27 @@ header h1{font-size:15px}
 
 <script>
 (function(){
-// ===== CONFIGURATION =====
-var FB = "https://vms-pro-8fd53-default-rtdb.europe-west1.firebasedatabase.app";
-var EMAILJS_PUBLIC_KEY = "PqBKFWGBBhbdjBM6f";
-var EMAILJS_SERVICE_ID = "service_221b5vd";
-var EMAILJS_OTP_TEMPLATE = "template_a6rxqwr";
-var EMAILJS_VISITOR_TEMPLATE = "template_a6rxqwr";
-var USER_EMAILS = {"admin":"amitkundu03@gmail.com","reception":"amitkundu03@gmail.com","security":"amitkundu03@gmail.com"};
+var FB="https://vms-pro-8fd53-default-rtdb.europe-west1.firebasedatabase.app";
+var EJS_KEY="PqBKFWGBBhbdjBM6f";
+var EJS_SVC="service_221b5vd";
+var EJS_TPL="template_a6rxqwr";
+var USER_EMAILS={"admin":"amitkundu03@gmail.com","reception":"amitkundu03@gmail.com","security":"amitkundu03@gmail.com"};
+emailjs.init(EJS_KEY);
 
-emailjs.init(EMAILJS_PUBLIC_KEY);
+function sendEmail(to,subj,msg){return emailjs.send(EJS_SVC,EJS_TPL,{to_email:to,subject:subj,message:msg})}
 
-// ===== STORAGE =====
 var DB={
-  get:function(k){try{return JSON.parse(localStorage.getItem("vms_"+k)||"[]")}catch(e){return[]}},
-  set:function(k,d){localStorage.setItem("vms_"+k,JSON.stringify(d));if(FB)fetch(FB+"/"+k+".json",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(d)}).catch(function(){})},
-  add:function(k,item){var a=DB.get(k);item.id=k[0].toUpperCase()+"-"+Date.now();a.unshift(item);DB.set(k,a);return item},
-  del:function(k,id){DB.set(k,DB.get(k).filter(function(x){return x.id!==id}))},
-  upd:function(k,id,u){var a=DB.get(k);for(var i=0;i<a.length;i++){if(a[i].id===id){for(var x in u)a[i][x]=u[x];break}}DB.set(k,a)},
-  sync:function(){if(!FB)return Promise.resolve(false);return fetch(FB+"/.json").then(function(r){return r.json()}).then(function(d){if(d){if(d.visitors&&d.visitors.length)localStorage.setItem("vms_visitors",JSON.stringify(d.visitors));if(d.employees&&d.employees.length)localStorage.setItem("vms_employees",JSON.stringify(d.employees));if(d.blacklist&&d.blacklist.length)localStorage.setItem("vms_blacklist",JSON.stringify(d.blacklist));if(d.users&&d.users.length)localStorage.setItem("vms_users",JSON.stringify(d.users))}return true}).catch(function(){return false})}
+get:function(k){try{return JSON.parse(localStorage.getItem("vms_"+k)||"[]")}catch(e){return[]}},
+set:function(k,d){localStorage.setItem("vms_"+k,JSON.stringify(d));if(FB)fetch(FB+"/"+k+".json",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(d)}).catch(function(){})},
+add:function(k,item){var a=DB.get(k);item.id=k[0].toUpperCase()+"-"+Date.now();a.unshift(item);DB.set(k,a);return item},
+del:function(k,id){DB.set(k,DB.get(k).filter(function(x){return x.id!==id}))},
+upd:function(k,id,u){var a=DB.get(k);for(var i=0;i<a.length;i++){if(a[i].id===id){for(var x in u)a[i][x]=u[x];break}}DB.set(k,a)},
+sync:function(){if(!FB)return Promise.resolve(false);return fetch(FB+"/.json").then(function(r){return r.json()}).then(function(d){if(d){if(d.visitors)localStorage.setItem("vms_visitors",JSON.stringify(d.visitors));if(d.employees)localStorage.setItem("vms_employees",JSON.stringify(d.employees));if(d.blacklist)localStorage.setItem("vms_blacklist",JSON.stringify(d.blacklist));if(d.users)localStorage.setItem("vms_users",JSON.stringify(d.users))}return true}).catch(function(){return false})}
 };
 
-// ===== DEFAULTS =====
+// Default users only — NO default employees
 if(!DB.get("users").length){DB.set("users",[{id:"U-1",u:"admin",p:"amit@1988",r:"Admin",email:"amitkundu03@gmail.com"},{id:"U-2",u:"reception",p:"pass123",r:"Reception",email:""},{id:"U-3",u:"security",p:"guard123",r:"Security",email:""}])}
-if(!DB.get("employees").length){var dd=[["Rahul Sharma","Production","JBM-04","Manager","rahul@company.com"],["Suresh Verma","Quality","JBM-04","Engineer","suresh@company.com"],["Priya Patel","HR","JBM-04","HR Lead","priya@company.com"],["Vikash Singh","Maintenance","JBM-04","Supervisor",""],["Amit Kumar","Engineering","ANTB PTR","Sr. Engineer","amit.k@company.com"],["Neha Gupta","Admin","ANTB PTR","Admin Head","neha@company.com"],["Rajesh Yadav","Production","ANTB PTR","Shift Incharge",""],["Deepak Tiwari","Safety","ANTB PTR","Safety Officer","deepak@company.com"],["Sanjay Mehta","Operations","JBMA PTR","Plant Head","sanjay@company.com"],["Pooja Rawat","Quality","JBMA PTR","QA Engineer","pooja@company.com"],["Manoj Pandey","Store","JBMA PTR","Store Incharge",""],["Kavita Joshi","Purchase","JBMA PTR","Purchase Officer","kavita@company.com"]];DB.set("employees",dd.map(function(e,i){return{id:"E-"+(100+i),name:e[0],dept:e[1],plant:e[2],desig:e[3],email:e[4]||""}}))}
 
-// ===== HELPERS =====
 var user=null,sel=new Set(),eFilter="all",vFilter="all",curPh=null;
 function toast(m,t){var e=document.getElementById("tst");e.textContent=m;e.className="toast show"+(t==="e"?" er":t==="w"?" wr":"");setTimeout(function(){e.className="toast"},2500)}
 function ft(i){if(!i)return"—";return new Date(i).toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit"})}
@@ -279,138 +270,112 @@ function compress(file,cb){var r=new FileReader();r.onload=function(e){var img=n
 function genOTP(){return Math.floor(100000+Math.random()*900000).toString()}
 function maskEmail(e){if(!e)return"***";var p=e.split("@");return p[0].slice(0,2)+"***@"+p[1]}
 
-// ===== NOTIFY HOST VIA EMAIL =====
 function notifyHost(hostName,visitorName,plant,purpose,phone){
-  var emps=DB.get("employees");
-  var host=null;
-  for(var i=0;i<emps.length;i++){
-    if(hostName.indexOf(emps[i].name)>-1){host=emps[i];break}
-  }
-  if(!host||!host.email){return}
-  var time=new Date().toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit"});
-  emailjs.send(EMAILJS_SERVICE_ID,EMAILJS_VISITOR_TEMPLATE,{
-    to_email:host.email,
-    host_name:host.name,
-    visitor_name:visitorName,
-    plant:plant,
-    purpose:purpose,
-    visitor_phone:phone||"N/A",
-    time:time,
-    app_name:"VMS Pro"
-  }).then(function(){
-    toast("📧 Host notified!");
-  }).catch(function(){});
+var emps=DB.get("employees"),host=null;
+for(var i=0;i<emps.length;i++){if(hostName.indexOf(emps[i].name)>-1){host=emps[i];break}}
+if(!host||!host.email)return;
+var time=new Date().toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit"});
+var msg="Hello "+host.name+",\n\nA visitor has arrived to meet you at reception.\n\nVisitor: "+visitorName+"\nPlant: "+plant+"\nPurpose: "+purpose+"\nPhone: "+(phone||"N/A")+"\nTime: "+time+"\n\nPlease come to reception.\n\n- VMS Pro";
+sendEmail(host.email,"Visitor Arrived - "+visitorName,msg).then(function(){toast("📧 Host notified!")}).catch(function(){});
 }
 
-// ===== OTP STATE =====
 var otpState={code:"",user:"",email:"",ts:0};
-
-// ===== AUTH =====
 var s=localStorage.getItem("vms6_sess");if(s)try{user=JSON.parse(s);showApp()}catch(e){}
 
 document.getElementById("lForm").addEventListener("submit",function(e){
-  e.preventDefault();
-  var un=document.getElementById("lU").value.trim().toLowerCase(),pw=document.getElementById("lP").value;
-  var users=DB.get("users"),found=null;
-  for(var i=0;i<users.length;i++){if(users[i].u===un&&users[i].p===pw){found=users[i];break}}
-  if(found){user=found;localStorage.setItem("vms6_sess",JSON.stringify(found));document.getElementById("lErr").style.display="none";showApp()}
-  else{document.getElementById("lErr").style.display="block"}
+e.preventDefault();
+var un=document.getElementById("lU").value.trim().toLowerCase(),pw=document.getElementById("lP").value;
+var users=DB.get("users"),found=null;
+for(var i=0;i<users.length;i++){if(users[i].u===un&&users[i].p===pw){found=users[i];break}}
+if(found){user=found;localStorage.setItem("vms6_sess",JSON.stringify(found));document.getElementById("lErr").style.display="none";showApp()}
+else{document.getElementById("lErr").style.display="block"}
 });
 document.getElementById("lout").addEventListener("click",function(){user=null;localStorage.removeItem("vms6_sess");document.getElementById("app").classList.remove("show");document.getElementById("login").classList.remove("hide");showPanel("loginPanel")});
 
 function showApp(){document.getElementById("login").classList.add("hide");document.getElementById("app").classList.add("show");document.getElementById("rBdg").textContent=user.r;if(user.r==="Admin"){document.getElementById("bAct").style.display="flex";document.getElementById("addUserDiv").style.display="block"}DB.sync().then(function(ok){document.getElementById("dot").className="dot"+(ok?"":" off");document.getElementById("stxt").textContent=ok?"Cloud Synced":"Local";refresh()});refresh()}
 
-// ===== FORGOT PASSWORD =====
 function showPanel(id){["loginPanel","forgotPanel","otpPanel","newPwdPanel"].forEach(function(p){document.getElementById(p).style.display=p===id?"block":"none"})}
 document.getElementById("forgotLink").addEventListener("click",function(){showPanel("forgotPanel")});
 document.getElementById("backLogin").addEventListener("click",function(){showPanel("loginPanel")});
 document.getElementById("backForgot").addEventListener("click",function(){showPanel("forgotPanel")});
 
 document.getElementById("sendOtpBtn").addEventListener("click",function(){
-  var un=document.getElementById("fpUser").value.trim().toLowerCase();
-  var users=DB.get("users"),found=null;
-  for(var i=0;i<users.length;i++){if(users[i].u===un){found=users[i];break}}
-  if(!found){document.getElementById("fpErr").textContent="Username not found";document.getElementById("fpErr").style.display="block";return}
-  var email=USER_EMAILS[un]||found.email||"";
-  if(!email){document.getElementById("fpErr").textContent="No email linked. Contact admin.";document.getElementById("fpErr").style.display="block";return}
-  document.getElementById("fpErr").style.display="none";
-  var otp=genOTP();
-  otpState={code:otp,user:un,email:email,ts:Date.now()};
-  document.getElementById("sendOtpBtn").disabled=true;
-  document.getElementById("sendOtpBtn").textContent="Sending...";
-  emailjs.send(EMAILJS_SERVICE_ID,EMAILJS_OTP_TEMPLATE,{to_email:email,otp_code:otp,username:un,app_name:"VMS Pro"}).then(function(){
-    document.getElementById("sendOtpBtn").disabled=false;
-    document.getElementById("sendOtpBtn").textContent="📧 Send OTP to Email";
-    document.getElementById("otpEmailShow").textContent=maskEmail(email);
-    showPanel("otpPanel");
-  }).catch(function(){
-    document.getElementById("sendOtpBtn").disabled=false;
-    document.getElementById("sendOtpBtn").textContent="📧 Send OTP to Email";
-    document.getElementById("fpErr").textContent="Failed to send.";
-    document.getElementById("fpErr").style.display="block";
-  });
+var un=document.getElementById("fpUser").value.trim().toLowerCase();
+var users=DB.get("users"),found=null;
+for(var i=0;i<users.length;i++){if(users[i].u===un){found=users[i];break}}
+if(!found){document.getElementById("fpErr").textContent="Username not found";document.getElementById("fpErr").style.display="block";return}
+var email=USER_EMAILS[un]||found.email||"";
+if(!email){document.getElementById("fpErr").textContent="No email linked.";document.getElementById("fpErr").style.display="block";return}
+document.getElementById("fpErr").style.display="none";
+var otp=genOTP();
+otpState={code:otp,user:un,email:email,ts:Date.now()};
+document.getElementById("sendOtpBtn").disabled=true;
+document.getElementById("sendOtpBtn").textContent="Sending...";
+var msg="Hello "+un+",\n\nYour OTP for password reset is:\n\n"+otp+"\n\nValid for 5 minutes. Do not share.\n\n- VMS Pro";
+sendEmail(email,"Password Reset OTP",msg).then(function(){
+document.getElementById("sendOtpBtn").disabled=false;
+document.getElementById("sendOtpBtn").textContent="📧 Send OTP to Email";
+document.getElementById("otpEmailShow").textContent=maskEmail(email);
+showPanel("otpPanel");
+}).catch(function(){
+document.getElementById("sendOtpBtn").disabled=false;
+document.getElementById("sendOtpBtn").textContent="📧 Send OTP to Email";
+document.getElementById("fpErr").textContent="Failed to send.";
+document.getElementById("fpErr").style.display="block";
+});
 });
 
 document.getElementById("verifyOtpBtn").addEventListener("click",function(){
-  var entered=document.getElementById("otpInput").value.trim();
-  if(Date.now()-otpState.ts>300000){document.getElementById("otpErr").textContent="OTP expired.";document.getElementById("otpErr").style.display="block";return}
-  if(entered!==otpState.code){document.getElementById("otpErr").textContent="Invalid OTP.";document.getElementById("otpErr").style.display="block";return}
-  document.getElementById("otpErr").style.display="none";
-  showPanel("newPwdPanel");
+var entered=document.getElementById("otpInput").value.trim();
+if(Date.now()-otpState.ts>300000){document.getElementById("otpErr").textContent="OTP expired.";document.getElementById("otpErr").style.display="block";return}
+if(entered!==otpState.code){document.getElementById("otpErr").textContent="Invalid OTP.";document.getElementById("otpErr").style.display="block";return}
+document.getElementById("otpErr").style.display="none";
+showPanel("newPwdPanel");
 });
 document.getElementById("resendOtp").addEventListener("click",function(){showPanel("forgotPanel")});
 
 document.getElementById("resetPwdBtn").addEventListener("click",function(){
-  var n=document.getElementById("npNew").value,c=document.getElementById("npConf").value;
-  if(n.length<4){document.getElementById("npErr").textContent="Min 4 characters";document.getElementById("npErr").style.display="block";return}
-  if(n!==c){document.getElementById("npErr").textContent="Passwords don't match";document.getElementById("npErr").style.display="block";return}
-  var users=DB.get("users");
-  for(var i=0;i<users.length;i++){if(users[i].u===otpState.user){users[i].p=n;break}}
-  DB.set("users",users);otpState={code:"",user:"",email:"",ts:0};
-  showPanel("loginPanel");toast("✅ Password reset!");
+var n=document.getElementById("npNew").value,c=document.getElementById("npConf").value;
+if(n.length<4){document.getElementById("npErr").textContent="Min 4 characters";document.getElementById("npErr").style.display="block";return}
+if(n!==c){document.getElementById("npErr").textContent="Passwords don't match";document.getElementById("npErr").style.display="block";return}
+var users=DB.get("users");
+for(var i=0;i<users.length;i++){if(users[i].u===otpState.user){users[i].p=n;break}}
+DB.set("users",users);otpState={code:"",user:"",email:"",ts:0};
+showPanel("loginPanel");toast("✅ Password reset!");
 });
 
-// ===== NAV =====
 document.getElementById("nav").addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;document.querySelectorAll(".nav button").forEach(function(x){x.classList.remove("on")});b.classList.add("on");document.querySelectorAll(".pg").forEach(function(x){x.classList.remove("on")});document.getElementById(b.dataset.p).classList.add("on");refresh()});
 
-// ===== PHOTO =====
 document.getElementById("pua").addEventListener("click",function(){document.getElementById("ciPh").click()});
 document.getElementById("ciPh").addEventListener("change",function(e){var f=e.target.files[0];if(!f)return;compress(f,function(c){curPh=c;document.getElementById("ppr").src=c;document.getElementById("ppr").classList.add("sh");document.getElementById("pi").style.display="none";document.getElementById("pt").textContent="✅ Ready"})});
 function rstPh(){curPh=null;document.getElementById("ppr").src="";document.getElementById("ppr").classList.remove("sh");document.getElementById("pi").style.display="";document.getElementById("pt").textContent="Tap to capture";document.getElementById("ciPh").value=""}
 
-// ===== PLANT→HOST =====
 document.getElementById("ciPl").addEventListener("change",function(){var p=this.value,h=document.getElementById("ciH");if(!p){h.innerHTML='<option value="">Select plant first</option>';return}var em=DB.get("employees").filter(function(x){return x.plant===p});h.innerHTML='<option value="">Select Host</option>'+em.map(function(x){return"<option>"+x.name+" — "+x.dept+"</option>"}).join("")});
 
-// ===== DASHBOARD =====
-function rDash(){var v=DB.get("visitors");document.getElementById("xT").textContent=v.length;document.getElementById("xA").textContent=v.filter(function(x){return x.status==="checked_in"}).length;document.getElementById("xB").textContent=v.filter(function(x){return x.status==="blocked"}).length;var rc=v.slice(0,6);document.getElementById("feed").innerHTML=rc.length?rc.map(function(x){return'<div class="vi"><div class="av '+(x.status==="checked_in"?"ac":"")+'">'+( x.status==="checked_in"?"✅":x.status==="blocked"?"🚫":"🚪")+'</div><div class="inf"><div class="n">'+x.name+" · "+(x.status==="checked_in"?"IN":x.status==="blocked"?"BLOCKED":"OUT")+'</div><div class="m">'+(x.plant||"")+" · "+ago(x.ts)+"</div></div></div>"}).join(""):'<div class="em">No activity</div>'}
+function rDash(){var v=DB.get("visitors");document.getElementById("xT").textContent=v.length;document.getElementById("xA").textContent=v.filter(function(x){return x.status==="checked_in"}).length;document.getElementById("xB").textContent=v.filter(function(x){return x.status==="blocked"}).length;var rc=v.slice(0,6);document.getElementById("feed").innerHTML=rc.length?rc.map(function(x){return'<div class="vi"><div class="av '+(x.status==="checked_in"?"ac":"")+'">'+( x.status==="checked_in"?"✅":x.status==="blocked"?"🚫":"🚪")+'</div><div class="inf"><div class="n">'+x.name+" · "+(x.status==="checked_in"?"IN":x.status==="blocked"?"BLOCKED":"OUT")+'</div><div class="m">'+(x.plant||"")+" · "+ago(x.ts)+"</div></div></div>"}).join(""):'<div class="em">No activity yet</div>'}
 
-// ===== CHECK IN (WITH HOST EMAIL NOTIFICATION) =====
 document.getElementById("ciF").addEventListener("submit",function(e){
-  e.preventDefault();
-  var name=document.getElementById("ciN").value.trim(),phone=document.getElementById("ciPn").value.trim(),plant=document.getElementById("ciPl").value,host=document.getElementById("ciH").value,purpose=document.getElementById("ciPu").value;
-  var blist=DB.get("blacklist"),sec=null;
-  for(var i=0;i<blist.length;i++){if((blist[i].name||"").toLowerCase()===name.toLowerCase()||(blist[i].phone||"")===phone){sec=blist[i];break}}
-  if(sec&&sec.type==="blacklist"){toast("🚫 BLOCKED: "+name,"e");DB.add("visitors",{name:name,phone:phone,plant:plant,status:"blocked",ts:new Date().toISOString(),photo:curPh||""});this.reset();rstPh();refresh();return}
-  if(sec&&sec.type==="watchlist")toast("⚠️ Watchlisted!","w");
-  DB.add("visitors",{name:name,phone:phone,email:document.getElementById("ciEm").value.trim(),company:document.getElementById("ciCo").value.trim(),host:host,purpose:purpose,id_type:document.getElementById("ciIt").value,id_number:document.getElementById("ciId").value.trim(),plant:plant,laptop:document.getElementById("ciLp").value,status:"checked_in",cin:new Date().toISOString(),cout:"",photo:curPh||"",ts:new Date().toISOString()});
-  toast("✅ "+name+" checked in!");
-  // SEND EMAIL TO HOST
-  if(host)notifyHost(host,name,plant,purpose,phone);
-  this.reset();rstPh();refresh();
+e.preventDefault();
+var name=document.getElementById("ciN").value.trim(),phone=document.getElementById("ciPn").value.trim(),plant=document.getElementById("ciPl").value,host=document.getElementById("ciH").value,purpose=document.getElementById("ciPu").value;
+var blist=DB.get("blacklist"),sec=null;
+for(var i=0;i<blist.length;i++){if((blist[i].name||"").toLowerCase()===name.toLowerCase()||(blist[i].phone||"")===phone){sec=blist[i];break}}
+if(sec&&sec.type==="blacklist"){toast("🚫 BLOCKED: "+name,"e");DB.add("visitors",{name:name,phone:phone,plant:plant,status:"blocked",ts:new Date().toISOString(),photo:curPh||""});this.reset();rstPh();refresh();return}
+if(sec&&sec.type==="watchlist")toast("⚠️ Watchlisted!","w");
+DB.add("visitors",{name:name,phone:phone,email:document.getElementById("ciEm").value.trim(),company:document.getElementById("ciCo").value.trim(),host:host,purpose:purpose,id_type:document.getElementById("ciIt").value,id_number:document.getElementById("ciId").value.trim(),plant:plant,laptop:document.getElementById("ciLp").value,status:"checked_in",cin:new Date().toISOString(),cout:"",photo:curPh||"",ts:new Date().toISOString()});
+toast("✅ "+name+" checked in!");
+if(host)notifyHost(host,name,plant,purpose,phone);
+this.reset();rstPh();refresh();
 });
 
-// ===== VISITORS =====
 function rVis(){var q=(document.getElementById("vs").value||"").toLowerCase();var r=DB.get("visitors");if(vFilter!=="all")r=r.filter(function(x){return x.status===vFilter});if(q)r=r.filter(function(x){return(x.name||"").toLowerCase().indexOf(q)>-1||(x.phone||"").indexOf(q)>-1});document.getElementById("vl").innerHTML=r.length?r.map(function(x){var av=x.photo?'<img src="'+x.photo+'">':x.status==="checked_in"?"✅":"🚪";return'<div class="vi"><div class="av '+(x.status==="checked_in"?"ac":x.status==="blocked"?"bl":"")+'">'+av+'</div><div class="inf"><div class="n">'+x.name+'</div><div class="m">'+(x.plant||"")+" · "+(x.host||"")+" · "+ft(x.cin)+'</div></div><span class="tg '+(x.status==="checked_in"?"tg-a":x.status==="blocked"?"tg-b":"tg-o")+'">'+(x.status==="checked_in"?"In":x.status==="blocked"?"Blk":"Out")+"</span></div>"}).join(""):'<div class="em">No visitors</div>'}
 document.getElementById("vs").addEventListener("input",rVis);
 document.getElementById("vf").addEventListener("click",function(e){var s=e.target.closest("span");if(!s)return;document.querySelectorAll("#vf span").forEach(function(x){x.classList.remove("on")});s.classList.add("on");vFilter=s.dataset.v;rVis()});
 
-// ===== CHECK OUT =====
-function rOut(){var q=(document.getElementById("os").value||"").toLowerCase();var a=DB.get("visitors").filter(function(x){return x.status==="checked_in"});if(q)a=a.filter(function(x){return x.name.toLowerCase().indexOf(q)>-1});document.getElementById("ol").innerHTML=a.length?a.map(function(x){return'<div class="vi"><div class="av ac">✅</div><div class="inf"><div class="n">'+x.name+'</div><div class="m">'+(x.plant||"")+" · "+ft(x.cin)+'</div></div><button class="btn bd bsm" onclick="COUT(\''+x.id+"')\">Out</button></div>"}).join(""):'<div class="em">No active</div>'}
+function rOut(){var q=(document.getElementById("os").value||"").toLowerCase();var a=DB.get("visitors").filter(function(x){return x.status==="checked_in"});if(q)a=a.filter(function(x){return x.name.toLowerCase().indexOf(q)>-1});document.getElementById("ol").innerHTML=a.length?a.map(function(x){return'<div class="vi"><div class="av ac">✅</div><div class="inf"><div class="n">'+x.name+'</div><div class="m">'+(x.plant||"")+" · "+ft(x.cin)+'</div></div><button class="btn bd bsm" onclick="COUT(\''+x.id+"')\">Out</button></div>"}).join(""):'<div class="em">No active visitors</div>'}
 document.getElementById("os").addEventListener("input",rOut);
 window.COUT=function(id){DB.upd("visitors",id,{status:"checked_out",cout:new Date().toISOString()});toast("🚪 Checked out!");refresh()};
 
-// ===== EMPLOYEES =====
-function rEmp(){var em=DB.get("employees");if(eFilter!=="all")em=em.filter(function(x){return x.plant===eFilter});var isA=user&&user.r==="Admin";document.getElementById("selAll").checked=false;sel.clear();updSel();document.getElementById("el").innerHTML=em.length?em.map(function(x){var ini=(x.name||"").split(" ").map(function(w){return w[0]}).join("").slice(0,2);var chk=isA?'<input type="checkbox" class="ec" data-id="'+x.id+'" style="width:16px;height:16px;accent-color:var(--p)">':"";var emailIcon=x.email?'📧':'';return'<div class="vi">'+chk+'<div class="av">'+ini+'</div><div class="inf"><div class="n">'+x.name+' '+emailIcon+'</div><div class="m">'+(x.dept||"")+(x.desig?" · "+x.desig:"")+" · 🏭"+(x.plant||"")+'</div></div>'+(isA?'<button class="btn bd bsm" onclick="DELE(\''+x.id+"')\">🗑️</button>":"")+"</div>"}).join(""):'<div class="em">No employees</div>';document.querySelectorAll(".ec").forEach(function(c){c.addEventListener("change",function(){if(this.checked)sel.add(this.dataset.id);else sel.delete(this.dataset.id);updSel()})})}
+function rEmp(){var em=DB.get("employees");if(eFilter!=="all")em=em.filter(function(x){return x.plant===eFilter});var isA=user&&user.r==="Admin";document.getElementById("selAll").checked=false;sel.clear();updSel();document.getElementById("el").innerHTML=em.length?em.map(function(x){var ini=(x.name||"").split(" ").map(function(w){return w[0]}).join("").slice(0,2);var chk=isA?'<input type="checkbox" class="ec" data-id="'+x.id+'" style="width:16px;height:16px;accent-color:var(--p)">':"";var ei=x.email?"📧":"";return'<div class="vi">'+chk+'<div class="av">'+ini+'</div><div class="inf"><div class="n">'+x.name+" "+ei+'</div><div class="m">'+(x.dept||"")+(x.desig?" · "+x.desig:"")+" · 🏭"+(x.plant||"")+'</div></div>'+(isA?'<button class="btn bd bsm" onclick="DELE(\''+x.id+"')\">🗑️</button>":"")+"</div>"}).join(""):'<div class="em">No employees — add manually or upload CSV</div>';document.querySelectorAll(".ec").forEach(function(c){c.addEventListener("change",function(){if(this.checked)sel.add(this.dataset.id);else sel.delete(this.dataset.id);updSel()})})}
 document.getElementById("ef").addEventListener("click",function(e){var s=e.target.closest("span");if(!s)return;document.querySelectorAll("#ef span").forEach(function(x){x.classList.remove("on")});s.classList.add("on");eFilter=s.dataset.v;sel.clear();rEmp()});
 document.getElementById("selAll").addEventListener("change",function(){var em=DB.get("employees");if(eFilter!=="all")em=em.filter(function(x){return x.plant===eFilter});sel.clear();if(this.checked)em.forEach(function(x){sel.add(x.id)});document.querySelectorAll(".ec").forEach(function(c){c.checked=this.checked}.bind(this));updSel()});
 function updSel(){document.getElementById("selC").textContent=sel.size?sel.size+" selected":"";document.getElementById("delSel").style.display=sel.size?"inline-block":"none"}
@@ -418,32 +383,26 @@ document.getElementById("delSel").addEventListener("click",function(){if(!sel.si
 window.DELE=function(id){if(confirm("Delete?")){DB.del("employees",id);toast("Removed");refresh()}};
 document.getElementById("eF").addEventListener("submit",function(e){e.preventDefault();DB.add("employees",{name:document.getElementById("eN").value.trim(),dept:document.getElementById("eD").value,plant:document.getElementById("ePl").value,desig:document.getElementById("eDg").value.trim(),phone:document.getElementById("ePh").value.trim(),email:document.getElementById("eEm").value.trim()});toast("👨‍💼 Added!");this.reset();refresh()});
 
-// ===== CSV =====
 document.getElementById("dlTpl").addEventListener("click",function(){var c="Name,Department,Plant,Designation,Phone,Email\nRahul Sharma,Production,JBM-04,Manager,9876543210,rahul@company.com\n";var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([c],{type:"text/csv"}));a.download="employee_template.csv";a.click();toast("📥 Downloaded!")});
 document.getElementById("csvA").addEventListener("click",function(){document.getElementById("csvF").click()});
 document.getElementById("csvF").addEventListener("change",function(e){var f=e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(ev){var lines=ev.target.result.split(/\r?\n/).filter(function(l){return l.trim()});var start=lines[0].toLowerCase().indexOf("name")>-1?1:0;var recs=[];for(var i=start;i<lines.length;i++){var c=lines[i].split(",").map(function(x){return x.trim()});if(c[0])recs.push({name:c[0],dept:c[1]||"",plant:c[2]||"",desig:c[3]||"",phone:c[4]||"",email:c[5]||""})}if(!recs.length){toast("Empty","e");return}document.getElementById("csvPr").innerHTML='<div class="cd" style="border-color:var(--s)"><b style="color:var(--s)">'+recs.length+' found</b><button class="btn bs bsm" id="cfUp" style="margin:6px 4px 0 0">✅ Upload</button><button class="btn b2 bsm" id="cnUp">Cancel</button></div>';document.getElementById("cfUp").onclick=function(){recs.forEach(function(r){DB.add("employees",r)});toast("✅ "+recs.length+" uploaded!");document.getElementById("csvPr").innerHTML="";refresh()};document.getElementById("cnUp").onclick=function(){document.getElementById("csvPr").innerHTML=""}};r.readAsText(f)});
 
-// ===== SECURITY =====
 document.getElementById("bF").addEventListener("submit",function(e){e.preventDefault();DB.add("blacklist",{name:document.getElementById("bN").value.trim(),phone:document.getElementById("bPh").value.trim(),type:document.getElementById("bT").value,reason:document.getElementById("bR").value.trim(),ts:new Date().toISOString()});toast("🛡️ Added!");this.reset();refresh()});
 function rSec(){var bl=DB.get("blacklist");var bk=bl.filter(function(x){return x.type==="blacklist"}),wl=bl.filter(function(x){return x.type==="watchlist"});document.getElementById("blL").innerHTML=bk.length?bk.map(function(x){return'<div class="vi"><div class="av bl">🚫</div><div class="inf"><div class="n">'+x.name+'</div><div class="m">'+(x.reason||"")+'</div></div><button class="btn b2 bsm" onclick="RMS(\''+x.id+"')\">✕</button></div>"}).join(""):'<div class="em">None</div>';document.getElementById("wlL").innerHTML=wl.length?wl.map(function(x){return'<div class="vi"><div class="av" style="background:#ffedd5">⚠️</div><div class="inf"><div class="n">'+x.name+'</div><div class="m">'+(x.reason||"")+'</div></div><button class="btn b2 bsm" onclick="RMS(\''+x.id+"')\">✕</button></div>"}).join(""):'<div class="em">None</div>'}
 window.RMS=function(id){if(confirm("Remove?")){DB.del("blacklist",id);toast("Removed");refresh()}};
 
-// ===== REPORTS =====
 function rRpt(){var per=document.getElementById("rPer").value,pf=document.getElementById("rPl").value;var r=DB.get("visitors"),now=new Date();if(per==="today")r=r.filter(function(x){return(x.ts||"").slice(0,10)===now.toISOString().slice(0,10)});else if(per==="week")r=r.filter(function(x){return(x.ts||"")>=new Date(now-7*864e5).toISOString()});else if(per==="month")r=r.filter(function(x){return(x.ts||"")>=new Date(now-30*864e5).toISOString()});if(pf!=="all")r=r.filter(function(x){return x.plant===pf});var t=r.length,a=r.filter(function(x){return x.status==="checked_in"}).length,o=r.filter(function(x){return x.status==="checked_out"}).length,b=r.filter(function(x){return x.status==="blocked"}).length;document.getElementById("rS").innerHTML='<div class="rr"><span class="rl">Total</span><span class="rv">'+t+'</span></div><div class="rr"><span class="rl">Active</span><span class="rv">'+a+'</span></div><div class="rr"><span class="rl">Out</span><span class="rv">'+o+'</span></div><div class="rr"><span class="rl">Blocked</span><span class="rv">'+b+'</span></div>';var cl=["#1a73e8","#15803d","#ea580c","#dc2626","#7c3aed"];var pu={};r.forEach(function(x){if(x.purpose)pu[x.purpose]=(pu[x.purpose]||0)+1});var pa=Object.entries(pu).sort(function(a,b){return b[1]-a[1]}),mp=pa.length?pa[0][1]:1;document.getElementById("rP").innerHTML=pa.length?pa.map(function(p,i){return'<div class="rb"><div class="rbl"><span>'+p[0]+"</span><span>"+p[1]+'</span></div><div class="rbt"><div class="rbf" style="width:'+p[1]/mp*100+"%;background:"+cl[i%5]+'"></div></div></div>'}).join(""):'<div class="em">No data</div>'}
 document.getElementById("rPer").addEventListener("change",rRpt);
 document.getElementById("rPl").addEventListener("change",rRpt);
 
-// ===== EXPORT =====
 document.getElementById("exC").addEventListener("click",function(){var r=DB.get("visitors");if(!r.length){toast("No data","e");return}var c="Name,Phone,Company,Host,Purpose,Plant,Status,In,Out\n";r.forEach(function(v){c+=v.name+","+(v.phone||"")+","+(v.company||"")+","+(v.host||"")+","+(v.purpose||"")+","+(v.plant||"")+","+v.status+","+(v.cin||"")+","+(v.cout||"")+"\n"});var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([c],{type:"text/csv"}));a.download="vms_export.csv";a.click();toast("📥 Done!")});
 document.getElementById("exT").addEventListener("click",function(){var r=DB.get("visitors");var t="VMS REPORT\n"+new Date().toLocaleString()+"\nTotal: "+r.length+"\n====\n";r.forEach(function(v){t+=v.name+" | "+(v.plant||"")+" | "+v.status+"\n"});var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([t]));a.download="vms_report.txt";a.click();toast("📊 Done!")});
 
-// ===== PASSWORD =====
 document.getElementById("pwF").addEventListener("submit",function(e){e.preventDefault();var o=document.getElementById("pwO").value,n=document.getElementById("pwN").value,c=document.getElementById("pwC").value;if(o!==user.p){toast("Wrong password","e");return}if(n!==c){toast("Don't match","e");return}if(n.length<4){toast("Min 4 chars","e");return}var users=DB.get("users");for(var i=0;i<users.length;i++){if(users[i].u===user.u){users[i].p=n;break}}DB.set("users",users);user.p=n;localStorage.setItem("vms6_sess",JSON.stringify(user));toast("✅ Updated!");this.reset()});
 function rUsers(){var users=DB.get("users");document.getElementById("uL").innerHTML=user&&user.r==="Admin"?users.map(function(x){return'<div class="vi"><div class="av">'+x.r[0]+'</div><div class="inf"><div class="n">'+x.u+'</div><div class="m">'+x.r+(x.email?" · "+x.email:"")+'</div></div><button class="btn b2 bsm" onclick="RPWD(\''+x.id+"','"+x.u+"')\">Reset</button></div>"}).join(""):'<div class="em">Admin only</div>'}
 window.RPWD=function(id,un){var n=prompt("New password for "+un+":");if(n&&n.length>=4){var users=DB.get("users");for(var i=0;i<users.length;i++){if(users[i].id===id){users[i].p=n;break}}DB.set("users",users);toast("✅ Reset for "+un)}};
 document.getElementById("addUBtn").addEventListener("click",function(){var u=document.getElementById("nuU").value.trim().toLowerCase(),e=document.getElementById("nuE").value.trim(),p=document.getElementById("nuP").value,r=document.getElementById("nuR").value;if(!u||!p){toast("Fill username & password","e");return}DB.add("users",{u:u,p:p,r:r,email:e});if(e)USER_EMAILS[u]=e;toast("✅ User added!");document.getElementById("nuU").value="";document.getElementById("nuE").value="";document.getElementById("nuP").value="";refresh()});
 
-// ===== REFRESH =====
 function refresh(){rDash();rVis();rOut();rEmp();rSec();rRpt();rUsers()}
 })();
 </script>
