@@ -8,9 +8,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="VMS Pro">
-<link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="icon-192.png">
 <title>VMS Pro</title>
+<link rel="manifest" href="data:application/manifest+json,{%22name%22:%22VMS%20Pro%20-%20Visitor%20Management%22,%22short_name%22:%22VMS%20Pro%22,%22description%22:%22Visitor%20Management%20System%22,%22start_url%22:%22.%22,%22scope%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%231a73e8%22,%22theme_color%22:%22%231a73e8%22,%22orientation%22:%22portrait%22,%22icons%22:[{%22src%22:%22data:image/svg+xml,%253Csvg%2520xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%2520viewBox%3D%270%200%20512%20512%27%253E%253Crect%2520fill%3D%27%25231a73e8%27%2520width%3D%27512%27%2520height%3D%27512%27%2520rx%3D%2780%27%2F%253E%253Ctext%2520x%3D%27256%27%2520y%3D%27340%27%2520font-size%3D%27200%27%2520text-anchor%3D%27middle%27%2520fill%3D%27white%27%2520font-family%3D%27Arial%27%253EVMS%253C%2Ftext%253E%253C%2Fsvg%253E%22,%22sizes%22:%22512x512%22,%22type%22:%22image/svg+xml%22,%22purpose%22:%22any%22}]}">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect fill='%231a73e8' width='512' height='512' rx='80'/><text x='256' y='340' font-size='200' text-anchor='middle' fill='white' font-family='Arial'>VMS</text></svg>">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -409,7 +409,13 @@ document.getElementById("addUBtn").addEventListener("click",function(){var u=doc
 
 function refresh(){rDash();rVis();rOut();rEmp();rSec();rRpt();rUsers()}
 
-if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js')}
+// Register inline service worker
+if('serviceWorker' in navigator){
+var swCode='var C="vms-v2";self.addEventListener("install",function(e){self.skipWaiting()});self.addEventListener("activate",function(e){self.clients.claim()});self.addEventListener("fetch",function(e){e.respondWith(fetch(e.request).then(function(r){return r}).catch(function(){return caches.match(e.request)}))})';
+var swBlob=new Blob([swCode],{type:'application/javascript'});
+var swUrl=URL.createObjectURL(swBlob);
+navigator.serviceWorker.register(swUrl).catch(function(){});
+}
 })();
 </script>
 </body>
