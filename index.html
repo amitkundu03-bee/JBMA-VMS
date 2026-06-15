@@ -24,11 +24,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 #lErr{color:var(--d);font-size:11px;display:none;margin-bottom:6px}
 .lbtn{width:100%;padding:12px;background:var(--p);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer}
 .lbtn:disabled{opacity:.5}
-.forgot{color:var(--p);font-size:11px;cursor:pointer;margin-top:8px;display:inline-block;font-weight:600}
-.forgot:hover{text-decoration:underline}
+.forgot{color:var(--p);font-size:11px;cursor:pointer;margin-top:10px;display:inline-block;font-weight:600}
 #forgotPanel,#otpPanel,#newPwdPanel{display:none}
 .back-link{color:#666;font-size:10px;cursor:pointer;margin-bottom:10px;display:inline-block}
-.back-link:hover{color:var(--p)}
 .otp-info{background:#e8f0fe;border-radius:8px;padding:10px;font-size:10px;color:#333;margin-bottom:10px;line-height:1.5}
 .otp-info b{color:var(--p)}
 #app{display:none;flex-direction:column;height:100%}#app.show{display:flex}
@@ -127,7 +125,6 @@ header h1{font-size:15px}
 
 <div id="newPwdPanel">
 <h2 style="font-size:16px;margin-bottom:4px">🔒 Set New Password</h2>
-<p style="font-size:10px;color:#666;margin-bottom:12px">Create your new password</p>
 <div class="f"><label>NEW PASSWORD</label><input id="npNew" type="password" placeholder="Min 4 characters"></div>
 <div class="f"><label>CONFIRM PASSWORD</label><input id="npConf" type="password" placeholder="Confirm password"></div>
 <div id="npErr" style="color:var(--d);font-size:10px;display:none;margin-bottom:6px"></div>
@@ -193,6 +190,7 @@ header h1{font-size:15px}
 <div class="f"><label>NAME *</label><input id="eN" required placeholder="Name"></div>
 <div class="fr"><div class="f"><label>DEPT *</label><select id="eD" required><option value="">Select</option><option>Production</option><option>Quality</option><option>Maintenance</option><option>HR</option><option>Admin</option><option>Finance</option><option>Engineering</option><option>Logistics</option><option>Purchase</option><option>Safety</option><option>IT</option><option>Sales</option><option>Operations</option><option>Store</option></select></div><div class="f"><label>PLANT *</label><select id="ePl" required><option value="">Select</option><option>JBM-04</option><option>ANTB PTR</option><option>JBMA PTR</option></select></div></div>
 <div class="fr"><div class="f"><label>DESIGNATION</label><input id="eDg" placeholder="Designation"></div><div class="f"><label>PHONE</label><input id="ePh" type="tel" placeholder="Phone"></div></div>
+<div class="f"><label>EMAIL (for visitor alerts)</label><input id="eEm" type="email" placeholder="employee@company.com"></div>
 <button type="submit" class="btn bp">➕ Add</button>
 </form></div>
 </div>
@@ -248,11 +246,12 @@ header h1{font-size:15px}
 
 <script>
 (function(){
-// ===== YOUR CONFIGURATION (ALL SET!) =====
+// ===== CONFIGURATION =====
 var FB = "https://vms-pro-8fd53-default-rtdb.europe-west1.firebasedatabase.app";
 var EMAILJS_PUBLIC_KEY = "PqBKFWGBBhbdjBM6f";
 var EMAILJS_SERVICE_ID = "service_221b5vd";
-var EMAILJS_TEMPLATE_ID = "template_a6rxqwr";
+var EMAILJS_OTP_TEMPLATE = "template_a6rxqwr";
+var EMAILJS_VISITOR_TEMPLATE = "template_a6rxqwr";
 var USER_EMAILS = {"admin":"amitkundu03@gmail.com","reception":"amitkundu03@gmail.com","security":"amitkundu03@gmail.com"};
 
 emailjs.init(EMAILJS_PUBLIC_KEY);
@@ -269,7 +268,7 @@ var DB={
 
 // ===== DEFAULTS =====
 if(!DB.get("users").length){DB.set("users",[{id:"U-1",u:"admin",p:"amit@1988",r:"Admin",email:"amitkundu03@gmail.com"},{id:"U-2",u:"reception",p:"pass123",r:"Reception",email:""},{id:"U-3",u:"security",p:"guard123",r:"Security",email:""}])}
-if(!DB.get("employees").length){var dd=[["Rahul Sharma","Production","JBM-04","Manager"],["Suresh Verma","Quality","JBM-04","Engineer"],["Priya Patel","HR","JBM-04","HR Lead"],["Vikash Singh","Maintenance","JBM-04","Supervisor"],["Amit Kumar","Engineering","ANTB PTR","Sr. Engineer"],["Neha Gupta","Admin","ANTB PTR","Admin Head"],["Rajesh Yadav","Production","ANTB PTR","Shift Incharge"],["Deepak Tiwari","Safety","ANTB PTR","Safety Officer"],["Sanjay Mehta","Operations","JBMA PTR","Plant Head"],["Pooja Rawat","Quality","JBMA PTR","QA Engineer"],["Manoj Pandey","Store","JBMA PTR","Store Incharge"],["Kavita Joshi","Purchase","JBMA PTR","Purchase Officer"]];DB.set("employees",dd.map(function(e,i){return{id:"E-"+(100+i),name:e[0],dept:e[1],plant:e[2],desig:e[3]}}))}
+if(!DB.get("employees").length){var dd=[["Rahul Sharma","Production","JBM-04","Manager","rahul@company.com"],["Suresh Verma","Quality","JBM-04","Engineer","suresh@company.com"],["Priya Patel","HR","JBM-04","HR Lead","priya@company.com"],["Vikash Singh","Maintenance","JBM-04","Supervisor",""],["Amit Kumar","Engineering","ANTB PTR","Sr. Engineer","amit.k@company.com"],["Neha Gupta","Admin","ANTB PTR","Admin Head","neha@company.com"],["Rajesh Yadav","Production","ANTB PTR","Shift Incharge",""],["Deepak Tiwari","Safety","ANTB PTR","Safety Officer","deepak@company.com"],["Sanjay Mehta","Operations","JBMA PTR","Plant Head","sanjay@company.com"],["Pooja Rawat","Quality","JBMA PTR","QA Engineer","pooja@company.com"],["Manoj Pandey","Store","JBMA PTR","Store Incharge",""],["Kavita Joshi","Purchase","JBMA PTR","Purchase Officer","kavita@company.com"]];DB.set("employees",dd.map(function(e,i){return{id:"E-"+(100+i),name:e[0],dept:e[1],plant:e[2],desig:e[3],email:e[4]||""}}))}
 
 // ===== HELPERS =====
 var user=null,sel=new Set(),eFilter="all",vFilter="all",curPh=null;
@@ -279,6 +278,29 @@ function ago(i){if(!i)return"";var d=Math.floor((Date.now()-new Date(i).getTime(
 function compress(file,cb){var r=new FileReader();r.onload=function(e){var img=new Image();img.onload=function(){var w=img.width,h=img.height;if(w>250){h=h*(250/w);w=250}if(h>250){w=w*(250/h);h=250}var c=document.createElement("canvas");c.width=w;c.height=h;c.getContext("2d").drawImage(img,0,0,w,h);cb(c.toDataURL("image/jpeg",0.5))};img.src=e.target.result};r.readAsDataURL(file)}
 function genOTP(){return Math.floor(100000+Math.random()*900000).toString()}
 function maskEmail(e){if(!e)return"***";var p=e.split("@");return p[0].slice(0,2)+"***@"+p[1]}
+
+// ===== NOTIFY HOST VIA EMAIL =====
+function notifyHost(hostName,visitorName,plant,purpose,phone){
+  var emps=DB.get("employees");
+  var host=null;
+  for(var i=0;i<emps.length;i++){
+    if(hostName.indexOf(emps[i].name)>-1){host=emps[i];break}
+  }
+  if(!host||!host.email){return}
+  var time=new Date().toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit"});
+  emailjs.send(EMAILJS_SERVICE_ID,EMAILJS_VISITOR_TEMPLATE,{
+    to_email:host.email,
+    host_name:host.name,
+    visitor_name:visitorName,
+    plant:plant,
+    purpose:purpose,
+    visitor_phone:phone||"N/A",
+    time:time,
+    app_name:"VMS Pro"
+  }).then(function(){
+    toast("📧 Host notified!");
+  }).catch(function(){});
+}
 
 // ===== OTP STATE =====
 var otpState={code:"",user:"",email:"",ts:0};
@@ -316,7 +338,7 @@ document.getElementById("sendOtpBtn").addEventListener("click",function(){
   otpState={code:otp,user:un,email:email,ts:Date.now()};
   document.getElementById("sendOtpBtn").disabled=true;
   document.getElementById("sendOtpBtn").textContent="Sending...";
-  emailjs.send(EMAILJS_SERVICE_ID,EMAILJS_TEMPLATE_ID,{to_email:email,otp_code:otp,username:un,app_name:"VMS Pro"}).then(function(){
+  emailjs.send(EMAILJS_SERVICE_ID,EMAILJS_OTP_TEMPLATE,{to_email:email,otp_code:otp,username:un,app_name:"VMS Pro"}).then(function(){
     document.getElementById("sendOtpBtn").disabled=false;
     document.getElementById("sendOtpBtn").textContent="📧 Send OTP to Email";
     document.getElementById("otpEmailShow").textContent=maskEmail(email);
@@ -324,15 +346,15 @@ document.getElementById("sendOtpBtn").addEventListener("click",function(){
   }).catch(function(){
     document.getElementById("sendOtpBtn").disabled=false;
     document.getElementById("sendOtpBtn").textContent="📧 Send OTP to Email";
-    document.getElementById("fpErr").textContent="Failed to send email. Check config.";
+    document.getElementById("fpErr").textContent="Failed to send.";
     document.getElementById("fpErr").style.display="block";
   });
 });
 
 document.getElementById("verifyOtpBtn").addEventListener("click",function(){
   var entered=document.getElementById("otpInput").value.trim();
-  if(Date.now()-otpState.ts>300000){document.getElementById("otpErr").textContent="OTP expired. Please resend.";document.getElementById("otpErr").style.display="block";return}
-  if(entered!==otpState.code){document.getElementById("otpErr").textContent="Invalid OTP. Try again.";document.getElementById("otpErr").style.display="block";return}
+  if(Date.now()-otpState.ts>300000){document.getElementById("otpErr").textContent="OTP expired.";document.getElementById("otpErr").style.display="block";return}
+  if(entered!==otpState.code){document.getElementById("otpErr").textContent="Invalid OTP.";document.getElementById("otpErr").style.display="block";return}
   document.getElementById("otpErr").style.display="none";
   showPanel("newPwdPanel");
 });
@@ -344,11 +366,8 @@ document.getElementById("resetPwdBtn").addEventListener("click",function(){
   if(n!==c){document.getElementById("npErr").textContent="Passwords don't match";document.getElementById("npErr").style.display="block";return}
   var users=DB.get("users");
   for(var i=0;i<users.length;i++){if(users[i].u===otpState.user){users[i].p=n;break}}
-  DB.set("users",users);
-  otpState={code:"",user:"",email:"",ts:0};
-  document.getElementById("npNew").value="";document.getElementById("npConf").value="";
-  showPanel("loginPanel");
-  toast("✅ Password reset! Login now.");
+  DB.set("users",users);otpState={code:"",user:"",email:"",ts:0};
+  showPanel("loginPanel");toast("✅ Password reset!");
 });
 
 // ===== NAV =====
@@ -365,15 +384,19 @@ document.getElementById("ciPl").addEventListener("change",function(){var p=this.
 // ===== DASHBOARD =====
 function rDash(){var v=DB.get("visitors");document.getElementById("xT").textContent=v.length;document.getElementById("xA").textContent=v.filter(function(x){return x.status==="checked_in"}).length;document.getElementById("xB").textContent=v.filter(function(x){return x.status==="blocked"}).length;var rc=v.slice(0,6);document.getElementById("feed").innerHTML=rc.length?rc.map(function(x){return'<div class="vi"><div class="av '+(x.status==="checked_in"?"ac":"")+'">'+( x.status==="checked_in"?"✅":x.status==="blocked"?"🚫":"🚪")+'</div><div class="inf"><div class="n">'+x.name+" · "+(x.status==="checked_in"?"IN":x.status==="blocked"?"BLOCKED":"OUT")+'</div><div class="m">'+(x.plant||"")+" · "+ago(x.ts)+"</div></div></div>"}).join(""):'<div class="em">No activity</div>'}
 
-// ===== CHECK IN =====
+// ===== CHECK IN (WITH HOST EMAIL NOTIFICATION) =====
 document.getElementById("ciF").addEventListener("submit",function(e){
-  e.preventDefault();var name=document.getElementById("ciN").value.trim(),phone=document.getElementById("ciPn").value.trim(),plant=document.getElementById("ciPl").value;
+  e.preventDefault();
+  var name=document.getElementById("ciN").value.trim(),phone=document.getElementById("ciPn").value.trim(),plant=document.getElementById("ciPl").value,host=document.getElementById("ciH").value,purpose=document.getElementById("ciPu").value;
   var blist=DB.get("blacklist"),sec=null;
   for(var i=0;i<blist.length;i++){if((blist[i].name||"").toLowerCase()===name.toLowerCase()||(blist[i].phone||"")===phone){sec=blist[i];break}}
   if(sec&&sec.type==="blacklist"){toast("🚫 BLOCKED: "+name,"e");DB.add("visitors",{name:name,phone:phone,plant:plant,status:"blocked",ts:new Date().toISOString(),photo:curPh||""});this.reset();rstPh();refresh();return}
   if(sec&&sec.type==="watchlist")toast("⚠️ Watchlisted!","w");
-  DB.add("visitors",{name:name,phone:phone,email:document.getElementById("ciEm").value.trim(),company:document.getElementById("ciCo").value.trim(),host:document.getElementById("ciH").value,purpose:document.getElementById("ciPu").value,id_type:document.getElementById("ciIt").value,id_number:document.getElementById("ciId").value.trim(),plant:plant,laptop:document.getElementById("ciLp").value,status:"checked_in",cin:new Date().toISOString(),cout:"",photo:curPh||"",ts:new Date().toISOString()});
-  toast("✅ "+name+" checked in!");this.reset();rstPh();refresh();
+  DB.add("visitors",{name:name,phone:phone,email:document.getElementById("ciEm").value.trim(),company:document.getElementById("ciCo").value.trim(),host:host,purpose:purpose,id_type:document.getElementById("ciIt").value,id_number:document.getElementById("ciId").value.trim(),plant:plant,laptop:document.getElementById("ciLp").value,status:"checked_in",cin:new Date().toISOString(),cout:"",photo:curPh||"",ts:new Date().toISOString()});
+  toast("✅ "+name+" checked in!");
+  // SEND EMAIL TO HOST
+  if(host)notifyHost(host,name,plant,purpose,phone);
+  this.reset();rstPh();refresh();
 });
 
 // ===== VISITORS =====
@@ -387,18 +410,18 @@ document.getElementById("os").addEventListener("input",rOut);
 window.COUT=function(id){DB.upd("visitors",id,{status:"checked_out",cout:new Date().toISOString()});toast("🚪 Checked out!");refresh()};
 
 // ===== EMPLOYEES =====
-function rEmp(){var em=DB.get("employees");if(eFilter!=="all")em=em.filter(function(x){return x.plant===eFilter});var isA=user&&user.r==="Admin";document.getElementById("selAll").checked=false;sel.clear();updSel();document.getElementById("el").innerHTML=em.length?em.map(function(x){var ini=(x.name||"").split(" ").map(function(w){return w[0]}).join("").slice(0,2);var chk=isA?'<input type="checkbox" class="ec" data-id="'+x.id+'" style="width:16px;height:16px;accent-color:var(--p)">':"";return'<div class="vi">'+chk+'<div class="av">'+ini+'</div><div class="inf"><div class="n">'+x.name+'</div><div class="m">'+(x.dept||"")+(x.desig?" · "+x.desig:"")+" · 🏭"+(x.plant||"")+'</div></div>'+(isA?'<button class="btn bd bsm" onclick="DELE(\''+x.id+"')\">🗑️</button>":"")+"</div>"}).join(""):'<div class="em">No employees</div>';document.querySelectorAll(".ec").forEach(function(c){c.addEventListener("change",function(){if(this.checked)sel.add(this.dataset.id);else sel.delete(this.dataset.id);updSel()})})}
+function rEmp(){var em=DB.get("employees");if(eFilter!=="all")em=em.filter(function(x){return x.plant===eFilter});var isA=user&&user.r==="Admin";document.getElementById("selAll").checked=false;sel.clear();updSel();document.getElementById("el").innerHTML=em.length?em.map(function(x){var ini=(x.name||"").split(" ").map(function(w){return w[0]}).join("").slice(0,2);var chk=isA?'<input type="checkbox" class="ec" data-id="'+x.id+'" style="width:16px;height:16px;accent-color:var(--p)">':"";var emailIcon=x.email?'📧':'';return'<div class="vi">'+chk+'<div class="av">'+ini+'</div><div class="inf"><div class="n">'+x.name+' '+emailIcon+'</div><div class="m">'+(x.dept||"")+(x.desig?" · "+x.desig:"")+" · 🏭"+(x.plant||"")+'</div></div>'+(isA?'<button class="btn bd bsm" onclick="DELE(\''+x.id+"')\">🗑️</button>":"")+"</div>"}).join(""):'<div class="em">No employees</div>';document.querySelectorAll(".ec").forEach(function(c){c.addEventListener("change",function(){if(this.checked)sel.add(this.dataset.id);else sel.delete(this.dataset.id);updSel()})})}
 document.getElementById("ef").addEventListener("click",function(e){var s=e.target.closest("span");if(!s)return;document.querySelectorAll("#ef span").forEach(function(x){x.classList.remove("on")});s.classList.add("on");eFilter=s.dataset.v;sel.clear();rEmp()});
 document.getElementById("selAll").addEventListener("change",function(){var em=DB.get("employees");if(eFilter!=="all")em=em.filter(function(x){return x.plant===eFilter});sel.clear();if(this.checked)em.forEach(function(x){sel.add(x.id)});document.querySelectorAll(".ec").forEach(function(c){c.checked=this.checked}.bind(this));updSel()});
 function updSel(){document.getElementById("selC").textContent=sel.size?sel.size+" selected":"";document.getElementById("delSel").style.display=sel.size?"inline-block":"none"}
 document.getElementById("delSel").addEventListener("click",function(){if(!sel.size)return;if(!confirm("Delete "+sel.size+" employees?"))return;sel.forEach(function(id){DB.del("employees",id)});toast("🗑️ Deleted!");sel.clear();refresh()});
 window.DELE=function(id){if(confirm("Delete?")){DB.del("employees",id);toast("Removed");refresh()}};
-document.getElementById("eF").addEventListener("submit",function(e){e.preventDefault();DB.add("employees",{name:document.getElementById("eN").value.trim(),dept:document.getElementById("eD").value,plant:document.getElementById("ePl").value,desig:document.getElementById("eDg").value.trim(),phone:document.getElementById("ePh").value.trim()});toast("👨‍💼 Added!");this.reset();refresh()});
+document.getElementById("eF").addEventListener("submit",function(e){e.preventDefault();DB.add("employees",{name:document.getElementById("eN").value.trim(),dept:document.getElementById("eD").value,plant:document.getElementById("ePl").value,desig:document.getElementById("eDg").value.trim(),phone:document.getElementById("ePh").value.trim(),email:document.getElementById("eEm").value.trim()});toast("👨‍💼 Added!");this.reset();refresh()});
 
 // ===== CSV =====
-document.getElementById("dlTpl").addEventListener("click",function(){var c="Name,Department,Plant,Designation,Phone\nRahul Sharma,Production,JBM-04,Manager,9876543210\n";var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([c],{type:"text/csv"}));a.download="employee_template.csv";a.click();toast("📥 Downloaded!")});
+document.getElementById("dlTpl").addEventListener("click",function(){var c="Name,Department,Plant,Designation,Phone,Email\nRahul Sharma,Production,JBM-04,Manager,9876543210,rahul@company.com\n";var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([c],{type:"text/csv"}));a.download="employee_template.csv";a.click();toast("📥 Downloaded!")});
 document.getElementById("csvA").addEventListener("click",function(){document.getElementById("csvF").click()});
-document.getElementById("csvF").addEventListener("change",function(e){var f=e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(ev){var lines=ev.target.result.split(/\r?\n/).filter(function(l){return l.trim()});var start=lines[0].toLowerCase().indexOf("name")>-1?1:0;var recs=[];for(var i=start;i<lines.length;i++){var c=lines[i].split(",").map(function(x){return x.trim()});if(c[0])recs.push({name:c[0],dept:c[1]||"",plant:c[2]||"",desig:c[3]||"",phone:c[4]||""})}if(!recs.length){toast("Empty","e");return}document.getElementById("csvPr").innerHTML='<div class="cd" style="border-color:var(--s)"><b style="color:var(--s)">'+recs.length+' found</b><button class="btn bs bsm" id="cfUp" style="margin:6px 4px 0 0">✅ Upload</button><button class="btn b2 bsm" id="cnUp">Cancel</button></div>';document.getElementById("cfUp").onclick=function(){recs.forEach(function(r){DB.add("employees",r)});toast("✅ "+recs.length+" uploaded!");document.getElementById("csvPr").innerHTML="";refresh()};document.getElementById("cnUp").onclick=function(){document.getElementById("csvPr").innerHTML=""}};r.readAsText(f)});
+document.getElementById("csvF").addEventListener("change",function(e){var f=e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(ev){var lines=ev.target.result.split(/\r?\n/).filter(function(l){return l.trim()});var start=lines[0].toLowerCase().indexOf("name")>-1?1:0;var recs=[];for(var i=start;i<lines.length;i++){var c=lines[i].split(",").map(function(x){return x.trim()});if(c[0])recs.push({name:c[0],dept:c[1]||"",plant:c[2]||"",desig:c[3]||"",phone:c[4]||"",email:c[5]||""})}if(!recs.length){toast("Empty","e");return}document.getElementById("csvPr").innerHTML='<div class="cd" style="border-color:var(--s)"><b style="color:var(--s)">'+recs.length+' found</b><button class="btn bs bsm" id="cfUp" style="margin:6px 4px 0 0">✅ Upload</button><button class="btn b2 bsm" id="cnUp">Cancel</button></div>';document.getElementById("cfUp").onclick=function(){recs.forEach(function(r){DB.add("employees",r)});toast("✅ "+recs.length+" uploaded!");document.getElementById("csvPr").innerHTML="";refresh()};document.getElementById("cnUp").onclick=function(){document.getElementById("csvPr").innerHTML=""}};r.readAsText(f)});
 
 // ===== SECURITY =====
 document.getElementById("bF").addEventListener("submit",function(e){e.preventDefault();DB.add("blacklist",{name:document.getElementById("bN").value.trim(),phone:document.getElementById("bPh").value.trim(),type:document.getElementById("bT").value,reason:document.getElementById("bR").value.trim(),ts:new Date().toISOString()});toast("🛡️ Added!");this.reset();refresh()});
