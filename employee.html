@@ -1,0 +1,227 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#15803d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>VMS Pro — Employee</title>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f0f2f5;min-height:100vh}
+:root{--p:#15803d;--d:#dc2626;--b:#1a73e8}
+header{background:var(--p);color:#fff;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100}
+header h1{font-size:16px}
+header button{background:rgba(255,255,255,.2);border:none;color:#fff;padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer}
+.cnt{padding:12px;max-width:500px;margin:0 auto}
+.cd{background:#fff;border-radius:14px;padding:14px;margin-bottom:12px;border:1px solid #e8e8e8}
+.cd h2{font-size:14px;margin-bottom:10px;color:#333}
+.f{margin-bottom:10px}
+.f label{font-size:10px;font-weight:600;color:#555;display:block;margin-bottom:3px}
+.f input,.f select,.f textarea{width:100%;padding:11px;border:1.5px solid #ddd;border-radius:8px;font-size:14px;background:#fafafa;font-family:inherit}
+.f input:focus,.f select:focus,.f textarea:focus{outline:none;border-color:var(--p);background:#fff}
+.f textarea{min-height:50px;resize:vertical}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.btn{width:100%;padding:12px;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;text-align:center}
+.bs{background:var(--p);color:#fff}
+.b2{background:#f0f0f0;color:#333;margin-top:6px}
+.toast{position:fixed;top:60px;left:12px;right:12px;padding:12px;border-radius:10px;font-size:12px;font-weight:600;z-index:9999;opacity:0;transition:all .3s;pointer-events:none;text-align:center;color:#fff;background:var(--p)}
+.toast.show{opacity:1}.toast.er{background:var(--d)}
+.code-box{background:#ecfdf5;border:2px dashed var(--p);border-radius:14px;padding:16px;text-align:center;margin:12px 0}
+.code-box .code{font-size:28px;font-weight:900;letter-spacing:5px;color:var(--p);font-family:monospace}
+.code-box small{font-size:10px;color:#666;display:block;margin-top:6px}
+.pi-card{background:#fff;border:1px solid #e8e8e8;border-radius:10px;padding:12px;margin-bottom:8px}
+.pi-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.pi-name{font-size:13px;font-weight:700}
+.pi-det{font-size:11px;color:#666;line-height:1.7}
+.tg{display:inline-block;padding:2px 8px;border-radius:6px;font-size:9px;font-weight:700}
+.tg-p{background:#fef3c7;color:#92400e}
+.tg-a{background:#dcfce7;color:#15803d}
+.tg-c{background:#e0e7ff;color:#3730a3}
+.em{text-align:center;padding:24px;color:#999;font-size:12px}
+#loginBox{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#15803d,#064e3b);padding:20px}
+#loginBox.hide{display:none}
+.lb{background:#fff;border-radius:20px;padding:28px;width:100%;max-width:360px;text-align:center}
+.lb h1{font-size:22px;margin:8px 0 4px}
+.lb p{font-size:11px;color:#666;margin-bottom:16px}
+#mainApp{display:none}
+#mainApp.show{display:block}
+.info-box{background:#ecfdf5;border-radius:8px;padding:8px 12px;margin-bottom:12px;font-size:11px;color:#333}
+.info-box b{color:var(--p)}
+</style>
+</head>
+<body>
+
+<div id="loginBox">
+<div class="lb">
+<div style="font-size:40px">👨‍💼</div>
+<h1>Employee Portal</h1>
+<p>VMS Pro — Pre-Intimation System<br>No password required</p>
+<div class="f"><label>SELECT PLANT</label>
+<select id="ePlant"><option value="">-- Select Plant --</option><option>JBM-04</option><option>ANTB PTR</option><option>JBMA PTR</option></select></div>
+<div class="f"><label>SELECT YOUR NAME</label>
+<select id="eName"><option value="">-- Select plant first --</option></select></div>
+<div id="eErr" style="color:#dc2626;font-size:11px;display:none;margin-bottom:8px"></div>
+<button class="btn bs" id="eLoginBtn">👨‍💼 Continue</button>
+<p style="font-size:9px;color:#aaa;margin-top:12px">🔒 Only pre-intimation access. No admin features.</p>
+</div>
+</div>
+
+<div id="mainApp">
+<header>
+<h1>📅 Pre-Intimation</h1>
+<button id="logoutBtn">Logout</button>
+</header>
+<div class="toast" id="tst"></div>
+<div class="cnt">
+<div class="info-box">👋 Hello <b id="empNameShow">Employee</b> | 🏭 <b id="empPlantShow">Plant</b></div>
+
+<div class="cd" style="border-color:#a7f3d0;background:#f0fdf4">
+<h2>📅 Pre-Register a Visitor</h2>
+<form id="piForm">
+<div class="f"><label>VISITOR NAME *</label><input id="piN" required placeholder="Full name of visitor"></div>
+<div class="fr">
+<div class="f"><label>PHONE *</label><input id="piPh" type="tel" required placeholder="+91 XXXXXXXXXX"></div>
+<div class="f"><label>EMAIL</label><input id="piEm" type="email" placeholder="visitor@email.com"></div>
+</div>
+<div class="f"><label>COMPANY</label><input id="piCo" placeholder="Company name"></div>
+<div class="fr">
+<div class="f"><label>VISIT DATE *</label><input id="piDt" type="date" required></div>
+<div class="f"><label>PURPOSE *</label><select id="piPu" required><option value="">Select</option><option>Meeting</option><option>Interview</option><option>Delivery</option><option>Maintenance</option><option>Client Visit</option><option>Audit</option><option>Personal</option></select></div>
+</div>
+<div class="f"><label>REMARKS / INSTRUCTIONS</label><textarea id="piRm" placeholder="Any special instructions for reception..."></textarea></div>
+<button type="submit" class="btn bs">📅 Submit Pre-Intimation</button>
+</form>
+</div>
+
+<div id="piResult" style="display:none"></div>
+
+<div class="cd">
+<h2>📋 My Requests</h2>
+<div id="myList"><div class="em">No requests yet</div></div>
+</div>
+</div>
+</div>
+
+<script>
+(function(){
+var FB="https://vms-pro-8fd53-default-rtdb.europe-west1.firebasedatabase.app";
+var EJS_KEY="PqBKFWGBBhbdjBM6f",EJS_SVC="service_221b5vd",EJS_TPL="template_a6rxqwr";
+emailjs.init(EJS_KEY);
+
+var empData=null;
+function toast(m,t){var e=document.getElementById("tst");e.textContent=m;e.className="toast show"+(t==="e"?" er":"");setTimeout(function(){e.className="toast"},2500)}
+function genCode(){return"VMS-"+Math.floor(1000+Math.random()*9000)}
+
+// DATABASE
+function dbGet(k){try{return JSON.parse(localStorage.getItem("vms_"+k)||"[]")}catch(e){return[]}}
+function dbSet(k,d){localStorage.setItem("vms_"+k,JSON.stringify(d));if(FB)fetch(FB+"/"+k+".json",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(d)}).catch(function(){})}
+function dbAdd(k,item){var a=dbGet(k);item.id=k[0].toUpperCase()+"-"+Date.now();a.unshift(item);dbSet(k,a);return item}
+
+// SYNC FROM CLOUD
+function syncFromCloud(){
+if(!FB)return Promise.resolve();
+return fetch(FB+"/.json").then(function(r){return r.json()}).then(function(d){
+if(d){
+if(d.employees)localStorage.setItem("vms_employees",JSON.stringify(d.employees));
+if(d.preint)localStorage.setItem("vms_preint",JSON.stringify(d.preint));
+}
+}).catch(function(){});
+}
+
+// PLANT CHANGE → LOAD EMPLOYEES
+document.getElementById("ePlant").addEventListener("change",function(){
+var pl=this.value;
+syncFromCloud().then(function(){
+var emps=dbGet("employees").filter(function(x){return x.plant===pl});
+var sel=document.getElementById("eName");
+sel.innerHTML='<option value="">-- Select Your Name --</option>'+emps.map(function(x){
+return'<option value="'+x.id+'">'+x.name+(x.dept?" ("+x.dept+")":"")+"</option>"
+}).join("");
+});
+});
+
+// LOGIN
+document.getElementById("eLoginBtn").addEventListener("click",function(){
+var id=document.getElementById("eName").value;
+var pl=document.getElementById("ePlant").value;
+if(!id||!pl){document.getElementById("eErr").textContent="Please select plant & name";document.getElementById("eErr").style.display="block";return}
+var emps=dbGet("employees"),found=null;
+for(var i=0;i<emps.length;i++){if(emps[i].id===id){found=emps[i];break}}
+if(!found){document.getElementById("eErr").textContent="Not found. Contact admin.";document.getElementById("eErr").style.display="block";return}
+empData={name:found.name,plant:found.plant,dept:found.dept,id:found.id,email:found.email||""};
+localStorage.setItem("vms_emp_sess",JSON.stringify(empData));
+showApp();
+});
+
+// SESSION RESTORE
+var sess=localStorage.getItem("vms_emp_sess");
+if(sess){try{empData=JSON.parse(sess);showApp()}catch(e){}}
+
+function showApp(){
+document.getElementById("loginBox").classList.add("hide");
+document.getElementById("mainApp").classList.add("show");
+document.getElementById("empNameShow").textContent=empData.name;
+document.getElementById("empPlantShow").textContent=empData.plant;
+syncFromCloud().then(renderList);
+renderList();
+}
+
+// LOGOUT
+document.getElementById("logoutBtn").addEventListener("click",function(){
+empData=null;localStorage.removeItem("vms_emp_sess");
+document.getElementById("mainApp").classList.remove("show");
+document.getElementById("loginBox").classList.remove("hide");
+});
+
+// SUBMIT PRE-INTIMATION
+document.getElementById("piForm").addEventListener("submit",function(e){
+e.preventDefault();
+var code=genCode();
+var rec=dbAdd("preint",{
+vname:document.getElementById("piN").value.trim(),
+vphone:document.getElementById("piPh").value.trim(),
+vemail:document.getElementById("piEm").value.trim(),
+company:document.getElementById("piCo").value.trim(),
+date:document.getElementById("piDt").value,
+purpose:document.getElementById("piPu").value,
+remarks:document.getElementById("piRm").value.trim(),
+host:empData.name,
+plant:empData.plant,
+code:code,
+status:"pending",
+ts:new Date().toISOString()
+});
+
+// Show code
+document.getElementById("piResult").style.display="block";
+document.getElementById("piResult").innerHTML='<div class="code-box"><small>✅ VISIT CODE — Share with your visitor</small><div class="code">'+code+'</div><small>Visitor shows this code at reception for quick check-in</small></div>';
+
+// Email visitor if provided
+var vemail=document.getElementById("piEm").value.trim();
+if(vemail){
+var msg="Hello "+document.getElementById("piN").value.trim()+",\n\nYou are pre-registered for a visit.\n\nVisit Code: "+code+"\nDate: "+document.getElementById("piDt").value+"\nHost: "+empData.name+"\nPlant: "+empData.plant+"\nPurpose: "+document.getElementById("piPu").value+"\n\nPlease show this code at reception.\n\n- VMS Pro";
+emailjs.send(EJS_SVC,EJS_TPL,{to_email:vemail,subject:"Visit Code: "+code,message:msg}).catch(function(){});
+}
+
+toast("✅ Pre-intimation submitted!");
+this.reset();
+renderList();
+});
+
+// MY REQUESTS LIST
+function renderList(){
+var pis=dbGet("preint").filter(function(x){return x.host===empData.name});
+var el=document.getElementById("myList");
+el.innerHTML=pis.length?pis.map(function(x){
+var stClass=x.status==="approved"?"tg-a":x.status==="completed"?"tg-c":"tg-p";
+var stLabel=x.status==="approved"?"✅ Approved":x.status==="completed"?"✔️ Done":"⏳ Pending";
+return'<div class="pi-card"><div class="pi-head"><span class="pi-name">'+x.vname+'</span><span class="tg '+stClass+'">'+stLabel+'</span></div><div class="pi-det">📅 '+x.date+' · '+x.purpose+'<br>📞 '+(x.vphone||"—")+' · 🏢 '+(x.company||"—")+'<br>🔑 <b style="color:var(--p);font-family:monospace;letter-spacing:2px">'+x.code+'</b></div></div>'
+}).join(""):'<div class="em">No requests yet. Submit one above!</div>';
+}
+})();
+</script>
+</body>
+</html>
