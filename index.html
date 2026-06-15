@@ -202,14 +202,10 @@ header h1{font-size:15px}
 
 <script>
 (function(){
-// ============================================
-// FIREBASE URL — OPTIONAL! Leave as "" to use localStorage only
-// If set, data syncs to cloud. If blank or fails, uses localStorage.
-// ============================================
-var FB = "https://vms-pro-8fd53-default-rtdb.europe-west1.firebasedatabase.app/";
-// Example: var FB = "https://vms-pro-xxxxx-default-rtdb.firebaseio.com";
+// ===== YOUR FIREBASE URL =====
+var FB = "https://vms-pro-8fd53-default-rtdb.europe-west1.firebasedatabase.app";
 
-// ===== STORAGE ENGINE (localStorage + optional Firebase) =====
+// ===== STORAGE ENGINE =====
 var DB = {
   get: function(key) {
     try { return JSON.parse(localStorage.getItem("vms_"+key) || "[]"); }
@@ -221,7 +217,7 @@ var DB = {
   },
   add: function(key, item) {
     var arr = DB.get(key);
-    item.id = key[0].toUpperCase() + "-" + (Date.now()%100000);
+    item.id = key[0].toUpperCase() + "-" + Date.now();
     arr.unshift(item);
     DB.set(key, arr);
     return item;
@@ -249,7 +245,7 @@ var DB = {
   }
 };
 
-// ===== INIT DEFAULT DATA =====
+// ===== INIT DEFAULTS =====
 function initDefaults(){
   if(!DB.get("users").length){
     DB.set("users",[{id:"U-1",u:"admin",p:"amit@1988",r:"Admin"},{id:"U-2",u:"reception",p:"pass123",r:"Reception"},{id:"U-3",u:"security",p:"guard123",r:"Security"}]);
@@ -289,7 +285,6 @@ function showApp(){
   document.getElementById("app").classList.add("show");
   document.getElementById("rBdg").textContent=user.r;
   if(user.r==="Admin")document.getElementById("bAct").style.display="flex";
-  // Try cloud sync
   DB.sync().then(function(ok){
     document.getElementById("dot").className="dot"+(ok?"":" off");
     document.getElementById("stxt").textContent=ok?"Cloud Synced":"Local Storage";
@@ -323,7 +318,6 @@ function rDash(){
 document.getElementById("ciF").addEventListener("submit",function(e){
   e.preventDefault();
   var name=document.getElementById("ciN").value.trim(),phone=document.getElementById("ciPn").value.trim(),plant=document.getElementById("ciPl").value;
-  // Security check
   var blist=DB.get("blacklist"),sec=null;
   for(var i=0;i<blist.length;i++){if((blist[i].name||"").toLowerCase()===name.toLowerCase()||(blist[i].phone||"")===phone){sec=blist[i];break}}
   if(sec&&sec.type==="blacklist"){toast("🚫 BLOCKED: "+name,"e");DB.add("visitors",{name:name,phone:phone,plant:plant,status:"blocked",ts:new Date().toISOString(),photo:curPh||""});this.reset();rstPh();refresh();return}
@@ -427,7 +421,7 @@ document.getElementById("pwF").addEventListener("submit",function(e){e.preventDe
 function rUsers(){var users=DB.get("users");document.getElementById("uL").innerHTML=user&&user.r==="Admin"?users.map(function(x){return'<div class="vi"><div class="av">'+x.r[0]+'</div><div class="inf"><div class="n">'+x.u+'</div><div class="m">'+x.r+'</div></div><button class="btn b2 bsm" onclick="RPWD(\''+x.id+"','"+x.u+"')\">Reset</button></div>"}).join(""):'<div class="em">Admin only</div>'}
 window.RPWD=function(id,un){var n=prompt("New password for "+un+":");if(n&&n.length>=4){var users=DB.get("users");for(var i=0;i<users.length;i++){if(users[i].id===id){users[i].p=n;break}}DB.set("users",users);toast("✅ Password reset for "+un)}};
 
-// ===== REFRESH ALL =====
+// ===== REFRESH =====
 function refresh(){rDash();rVis();rOut();rEmp();rSec();rRpt();rUsers()}
 })();
 </script>
