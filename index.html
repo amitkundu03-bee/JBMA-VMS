@@ -187,7 +187,15 @@ header h1{font-size:15px}
 <div class="pg" id="pg7">
 <div class="cd"><h2>🔑 Change Password</h2>
 <form id="pwF"><div class="f"><input id="pwO" type="password" placeholder="Current"></div><div class="f"><input id="pwN" type="password" placeholder="New"></div><button type="submit" class="btn bp">Update</button></form></div>
-<div class="cd"><h2>👥 Users</h2><div id="uL"></div></div>
+<div class="cd"><h2>👥 Manage Users</h2>
+<div id="uL"></div>
+<div style="margin-top:10px;border-top:1px solid #eee;padding-top:10px">
+<h3 style="font-size:11px;margin-bottom:6px">➕ Add New User</h3>
+<div class="fr"><div class="f"><input id="nuU" placeholder="Username" style="font-size:12px"></div><div class="f"><input id="nuP" placeholder="Password" style="font-size:12px"></div></div>
+<div class="fr"><div class="f"><input id="nuE" placeholder="Email" style="font-size:12px"></div><div class="f"><select id="nuR" style="font-size:12px"><option>Reception</option><option>Security</option><option>Admin</option></select></div></div>
+<button class="btn bp bsm" id="addUBtn">➕ Add User</button>
+</div>
+</div>
 </div>
 </div>
 <nav class="nav">
@@ -313,7 +321,52 @@ function rSec(){var bl=dbGet("blacklist");document.getElementById("blL").innerHT
 
 function rRpt(){var per=document.getElementById("rPer").value,pf=document.getElementById("rPl").value;var r=dbGet("visitors"),now=new Date();if(per==="today")r=r.filter(function(x){return(x.ts||"").slice(0,10)===now.toISOString().slice(0,10)});else if(per==="week")r=r.filter(function(x){return(x.ts||"")>=new Date(now-7*864e5).toISOString()});else if(per==="month")r=r.filter(function(x){return(x.ts||"")>=new Date(now-30*864e5).toISOString()});if(pf!=="all")r=r.filter(function(x){return x.plant===pf});document.getElementById("rS").innerHTML='<div class="rr"><span class="rl">Total</span><span class="rv">'+r.length+'</span></div><div class="rr"><span class="rl">Active</span><span class="rv">'+r.filter(function(x){return x.status==="checked_in"}).length+'</span></div><div class="rr"><span class="rl">Out</span><span class="rv">'+r.filter(function(x){return x.status==="checked_out"}).length+'</span></div><div class="rr"><span class="rl">Blocked</span><span class="rv">'+r.filter(function(x){return x.status==="blocked"}).length+'</span></div>'}
 
-function rUsers(){var users=dbGet("users");document.getElementById("uL").innerHTML=users.map(function(x){return'<div class="vi"><div class="av">'+x.r[0]+'</div><div class="inf"><div class="n">'+x.u+'</div><div class="m">'+x.r+'</div></div></div>'}).join("")}
+// Replace your existing rUsers function with this:
+
+function rUsers(){
+    var users = dbGet("users");
+    document.getElementById("uL").innerHTML = users.map(function(x){
+        var actions = '';
+        if(user.r === "Admin"){
+            actions = '<button class="btn b2 bsm" onclick="RPWD(\''+x.id+'\')">🔑 Reset</button> ';
+            if(x.u !== "admin") actions += '<button class="btn bd bsm" onclick="DELU(\''+x.id+'\')">🗑️</button>';
+        }
+        return '<div class="vi"><div class="av">'+x.r[0]+'</div><div class="inf"><div class="n">'+x.u+(x.email?' 📧':'')+'</div><div class="m">'+x.r+'</div></div><div>'+actions+'</div></div>';
+    }).join("");
+}
+
+// Add these global functions (put them near your other window.XXX functions):
+
+window.RPWD = function(id){
+    var np = prompt("Enter new password for this user:");
+    if(!np || np.length < 4){toast("Min 4 chars","e"); return;}
+    dbUpd("users", id, {p: np});
+    toast("✅ Password reset!");
+    rUsers();
+};
+
+window.DELU = function(id){
+    if(!confirm("Delete this user?")) return;
+    dbDel("users", id);
+    toast("Removed");
+    rUsers();
+};
+
+// Add User button handler (put this near your other event listeners):
+document.getElementById("addUBtn").addEventListener("click", function(){
+    var u = document.getElementById("nuU").value.trim().toLowerCase();
+    var p = document.getElementById("nuP").value;
+    var e = document.getElementById("nuE").value.trim();
+    var r = document.getElementById("nuR").value;
+    if(!u || !p){toast("Need username & password","e"); return;}
+    if(p.length < 4){toast("Min 4 chars","e"); return;}
+    dbAdd("users", {u:u, p:p, r:r, email:e});
+    toast("✅ User added!");
+    document.getElementById("nuU").value = "";
+    document.getElementById("nuP").value = "";
+    document.getElementById("nuE").value = "";
+    rUsers();
+});
 
 // SERVICE WORKER
 if('serviceWorker' in navigator){var sw='self.addEventListener("fetch",function(e){e.respondWith(fetch(e.request).catch(function(){return caches.match(e.request)}))})';navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:'application/javascript'}))).catch(function(){})}
